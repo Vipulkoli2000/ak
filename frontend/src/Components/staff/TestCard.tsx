@@ -80,7 +80,9 @@ function ProfileForm() {
   // Setup mutation using custom POST hook
   const staffMutation = usePostData({
     endpoint: "/api/staff",
+    
     params: {
+      queryKey: ["staff"],
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: `Bearer ${token}`,

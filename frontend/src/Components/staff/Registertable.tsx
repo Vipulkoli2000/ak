@@ -55,16 +55,31 @@ export default function Dashboardholiday() {
     params: {
       queryKey: ["staff", searchQuery, paginationState.currentPage],
       onSuccess: (response: any) => {
-        if (response.data) {
-          setData(response.data.Staff);
-          const pagination = response.data.Pagination;
-          setPaginationState({
-            currentPage: Number(pagination.current_page),
-            totalPages: Number(pagination.last_page),
-            perPage: Number(pagination.per_page),
-            total: Number(pagination.total),
-          });
-        }
+        if (!response?.data) return;
+
+        // Avoid updating state if data hasn't changed to prevent extra re-renders
+        setData((prev) => {
+          const newData = response.data.Staff || [];
+          return JSON.stringify(prev) !== JSON.stringify(newData) ? newData : prev;
+        });
+
+        const pagination = response.data.Pagination || {};
+        const newPaginationState = {
+          currentPage: Number(pagination.current_page),
+          totalPages: Number(pagination.last_page),
+          perPage: Number(pagination.per_page),
+          total: Number(pagination.total),
+        } as typeof paginationState;
+
+        // Only update pagination when something actually changed
+        setPaginationState((prev) => {
+          const isSame =
+            prev.currentPage === newPaginationState.currentPage &&
+            prev.totalPages === newPaginationState.totalPages &&
+            prev.perPage === newPaginationState.perPage &&
+            prev.total === newPaginationState.total;
+          return isSame ? prev : newPaginationState;
+        });
       },
       onError: (err: any) => {
         console.error("Error fetching data:", err);

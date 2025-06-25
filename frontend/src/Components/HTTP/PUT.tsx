@@ -1,10 +1,7 @@
-import React, { useMemo } from "react";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import {
   useMutation,
   UseMutationResult,
-  MutationFunction,
-  QueryClient,
   useQueryClient,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -34,7 +31,7 @@ const postData = async ({
 }): Promise<AxiosResponse<Response>> => {
   const config = headers ? { headers } : {};
   const response = await axios.put<Response>(endpoint, data, config);
-  return response.data;
+  return response;
 };
 
 // Custom hook to handle POST requests
@@ -45,6 +42,8 @@ const usePutData = ({
   endpoint: string;
   params: ParamsType;
 }): UseMutationResult<AxiosResponse<Response>, AxiosError, RequestData> => {
+  const queryClient = useQueryClient();
+
   return useMutation<AxiosResponse<Response>, AxiosError, RequestData>({
     mutationFn: (data) =>
       postData({
@@ -55,18 +54,23 @@ const usePutData = ({
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
       }),
-    onSuccess:
-      params.onSuccess ??
-      (() => {
-        // queryClient.invalidateQueries({ queryKey: params.queryKey }),
+    onSuccess: (data) => {
+      if (params.onSuccess) {
+        params.onSuccess(data);
+      } else {
         toast.success("Data updated successfully");
-      }),
-
-    onError:
-      params.onError ?? ((error: AxiosError) => toast.error(error.message)),
+      }
+      if (params.queryKey) {
+        const key = Array.isArray(params.queryKey)
+          ? params.queryKey
+          : [params.queryKey];
+        queryClient.invalidateQueries({ queryKey: key });
+      }
+    },
+    onError: params.onError ?? ((error: AxiosError) => toast.error(error.message)),
     retry: params.retry ?? 0,
-    onSettled: (data) => {
-      // console.log(data);
+    onSettled: () => {
+      /* noop */
     },
   });
 };

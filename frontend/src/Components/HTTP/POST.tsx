@@ -3,6 +3,7 @@ import {
   useMutation,
   UseMutationResult,
   MutationFunction,
+  useQueryClient,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -13,6 +14,7 @@ interface RequestData {
 
 interface ParamsType {
   headers?: Record<string, string>;
+  queryKey?: string | string[];
   onSuccess?: (data: AxiosResponse<Response>) => void;
   onError?: (error: AxiosError) => void;
   retry?: number;
@@ -41,6 +43,8 @@ const usePostData = ({
   endpoint: string;
   params: ParamsType;
 }): UseMutationResult<AxiosResponse<Response>, AxiosError, RequestData> => {
+  const queryClient = useQueryClient();
+
   return useMutation<AxiosResponse<Response>, AxiosError, RequestData>({
     mutationFn: (data) =>
       postData({
@@ -51,8 +55,21 @@ const usePostData = ({
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
       }),
-    onSuccess:
-      params.onSuccess ?? (() => toast.success("Data posted successfully")),
+    onSuccess: (data) => {
+      // first run user-provided callback if any
+      if (params.onSuccess) {
+        params.onSuccess(data);
+      } else {
+        toast.success("Data posted successfully");
+      }
+      // invalidate queries if caller supplied a key
+      if (params.queryKey) {
+        const key = Array.isArray(params.queryKey)
+          ? params.queryKey
+          : [params.queryKey];
+        queryClient.invalidateQueries({ queryKey: key });
+      }
+    },
     onError:
       params.onError ??
       ((error: AxiosError) => {
