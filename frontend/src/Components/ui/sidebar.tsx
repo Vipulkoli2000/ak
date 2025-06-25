@@ -276,8 +276,8 @@ const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <PanelLeft className="dark:text-white" />
-      <span className="sr-only">Toggle Sidebar</span>
+      <PanelLeft className="size-5 transition-transform duration-200 group-data-[state=expanded]:-rotate-180 dark:text-white" />
+     <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
 });

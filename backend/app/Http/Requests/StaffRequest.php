@@ -42,22 +42,9 @@ class StaffRequest extends FormRequest
             'education' => 'nullable', // Allow any format initially to debug
         ];
 
-        // If education is a JSON string, we'll handle it in the controller
-        // If we receive the actual array, apply validation
-        if ($this->has('education') && !is_string($this->education)) {
-            $rules['education.*.qualification'] = 'required_with:education|string|max:255';
-            $rules['education.*.college_name'] = 'required_with:education|string|max:255';
-            $rules['education.*.board_university'] = 'required_with:education|string|max:255';
-            $rules['education.*.passing_year'] = 'required_with:education|string';
-            $rules['education.*.percentage'] = 'required_with:education|string';
-        }
+      
 
-        // Add password requirement and unique email validation for new staff creation
-        if ($this->isMethod('POST')) {
-            $rules['password'] = 'required|string|min:6';
-            $rules['email'] = 'required|email|max:255|unique:users,email';
-            $rules['staff_name'] = 'required|string|max:255|unique:staff,staff_name';
-        }
+    
 
         if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
             $staff = Staff::find($this->route('staff'));

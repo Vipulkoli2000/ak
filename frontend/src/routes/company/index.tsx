@@ -1,9 +1,9 @@
 //ts-nocheck
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import Members from "../../Components/staff/Registertable";
+import Members from "../../Components/company/Registertable";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/staff/")({
+export const Route = createFileRoute("/company/")({
   beforeLoad: async ({ fetch }) => {
     const role = localStorage.getItem("role");
      if (role !== "admin" ) {

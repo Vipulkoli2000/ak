@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Bell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -102,7 +102,7 @@ interface NotificationPopoverProps {
 export const NotificationPopover = ({
   notifications: initialNotifications = dummyNotifications,
   onNotificationsChange,
-  buttonClassName = "w-10 h-10 rounded-xl bg-[#11111198] hover:bg-[#111111d1] shadow-[0_0_20px_rgba(0,0,0,0.2)]",
+  buttonClassName = "w-9 h-9 rounded-xl bg-transparent hover:bg-gray-100 ",
   popoverClassName = "bg-[#11111198] backdrop-blur-sm",
   textColor = "text-white",
   hoverBgColor = "hover:bg-[#ffffff37]",
@@ -110,6 +110,26 @@ export const NotificationPopover = ({
   headerBorderColor = "border-gray-200/50",
 }: NotificationPopoverProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
   const [notifications, setNotifications] =
     useState<Notification[]>(initialNotifications);
 
@@ -135,7 +155,7 @@ export const NotificationPopover = ({
   };
 
   return (
-    <div className={`relative ${textColor}`}>
+    <div ref={containerRef} className={`relative ${textColor}`}>
       <Button
         onClick={toggleOpen}
         size="icon"
@@ -157,7 +177,7 @@ export const NotificationPopover = ({
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              "absolute right-0 mt-2 w-80 max-h-[400px] overflow-y-auto rounded-xl shadow-lg",
+              "absolute  left-0 mt-2 w-96 max-h-[400px] overflow-y-auto rounded-xl shadow-lg z-[1000]",
               popoverClassName
             )}
           >

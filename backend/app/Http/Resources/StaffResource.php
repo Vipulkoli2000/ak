@@ -27,12 +27,12 @@ class StaffResource extends JsonResource
             'name' => $user ? $user->name : null,   
              'role'         => $role,
             'staff_name' =>$this->staff_name,
+            'mobile' => $this->mobile,
             'employee_code' => $this->employee_code,
              'date_of_birth' => $this->date_of_birth,
             'address' =>$this->address,
-            'gender' => $this->gender,
-            'blood_group' => $this->blood_group,
-            // 'user'=> $user,
+            'email' =>$this->email,
+                // 'user'=> $user,
          ];
     }
 }

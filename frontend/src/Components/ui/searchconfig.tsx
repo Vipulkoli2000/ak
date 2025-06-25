@@ -42,11 +42,30 @@ export const searchconfig: Record<string, MenuItem[]> = {
     {
       title: "Staff",
       url: "/staff",
+      icon: Users,
+    },
+    {
+      title: "Company",
+      url: "/company",
+      icon: Building,
+    },
+  ],
+  staff: [
+    {
+      title: "Dashboard",
+      url: "/dashboards",
       icon: Home,
     },
-
-
-  
+    {
+      title: "Staff",
+      url: "/staff",
+      icon: Users,
+    },
+    {
+      title: "Company",
+      url: "/company",
+      icon: Building,
+    },
   ],
    
 };

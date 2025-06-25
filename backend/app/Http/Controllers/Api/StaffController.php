@@ -69,7 +69,7 @@ public function index(Request $request): JsonResponse
 }
 
 
-    public function store(StaffRequest $request): JsonResponse
+    public function store(Request $request): JsonResponse
     {
         // Create a new user
         $active = 1;
@@ -80,8 +80,8 @@ public function index(Request $request): JsonResponse
         $user->password = Hash::make($request->input('password'));
         $user->save();
         
-        // Assign the 'member' role
-        $roleName = $request->input('role', 'member'); // Default to 'member' if not specified
+        // Assign the 'staff' role
+        $roleName = $request->input('role', 'staff'); // Default to 'staff' if not specified
         $role = Role::where("name", $roleName)->first();
         $user->assignRole($role);
         
@@ -94,13 +94,7 @@ public function index(Request $request): JsonResponse
         $staff->address = $request->input('address');
         $staff->email = $request->input('email');
         $staff->mobile = $request->input('mobile');
-        $staff->academic_years_id = $request->input('academic_years_id');
-        $staff->gender = $request->input('gender');
-      
-        
-       
-        
-        $staff->save();
+         $staff->save();
 
      
         
@@ -139,7 +133,7 @@ public function index(Request $request): JsonResponse
     /**
      * Update Staff.
      */
-    public function update(StaffRequest $request, string $id): JsonResponse
+    public function update(Request $request, string $id): JsonResponse
     {
         $staff = Staff::find($id);
 
@@ -168,7 +162,7 @@ public function index(Request $request): JsonResponse
         $user->save();
 
         // Update user role
-        $roleName = $request->input('role', 'member'); // Default to 'member' if not specified
+        $roleName = $request->input('role', 'staff'); // Default to 'staff' if not specified
         \Log::info('Updating role for user ' . $user->id . ' to: ' . $roleName);
         
         // Remove all current roles
@@ -189,103 +183,10 @@ public function index(Request $request): JsonResponse
         $staff->address = $request->input('address');
         $staff->email = $request->input('email');
         $staff->mobile = $request->input('mobile');
-        $staff->gender = $request->input('gender');
-        $staff->blood_group = $request->input('blood_group');
-        $staff->experience = $request->input('experience');
-        $staff->academic_years_id = $request->input('academic_years_id');
-        $staff->highest_qualification = $request->input('highest_qualification');
-        $staff->pan_number = $request->input('pan_number');
-        $staff->aadhaar_number = $request->input('aadhaar_number');
-          $staff->subject_type = $request->input('subject_type');
-        $staff->mode_of_payment = $request->input('mode_of_payment');
-        $staff->bank_name = $request->input('bank_name');
-        $staff->account_holder_name = $request->input('account_holder_name');
-        $staff->account_number = $request->input('account_number');
-        $staff->ifsc_code = $request->input('ifsc_code');
-        $staff->salary = $request->input('salary');
-        $staff->medical_history = $request->input('medical_history');
-
-        // Handle medical image upload
-        if ($request->hasFile('medical_image')) {
-            // Delete existing medical image if there is one
-            if ($staff->medical_image_path) {
-                Storage::disk('public')->delete('staff_medical_images/' . $staff->medical_image_path);
-            }
-            
-            $image = $request->file('medical_image');
-            $originalName = time() . '_' . $image->getClientOriginalName();
-            $path = $image->storeAs('staff_medical_images', $originalName, 'public');
-            $staff->medical_image_path = $originalName;
-        }
-        
-        // Delete medical image without replacement if requested
-        if ($request->input('delete_medical_image') === 'true' && $staff->medical_image_path) {
-            Storage::disk('public')->delete('staff_medical_images/' . $staff->medical_image_path);
-            $staff->medical_image_path = null;
-        }
-
-        // Handle course_id as JSON array
-        if ($request->has('course_id')) {
-            $courseIds = $request->input('course_id');
-            // Ensure we're storing it as JSON
-            $staff->course_id = is_array($courseIds) ? json_encode($courseIds) : $courseIds;
-        }
-        
-        // Handle semester_id as JSON array
-        if ($request->has('semester_id')) {
-            $semesterIds = $request->input('semester_id');
-            // Ensure we're storing it as JSON
-            $staff->semester_id = is_array($semesterIds) ? json_encode($semesterIds) : $semesterIds;
-        }
-        
-        // Handle subject_id as JSON array
-        if ($request->has('subject_id')) {
-            $subjectIds = $request->input('subject_id');
-            // Ensure we're storing it as JSON
-            $staff->subject_id = is_array($subjectIds) ? json_encode($subjectIds) : $subjectIds;
-        }
-       
+         
         $staff->save();
 
-        // Handle image uploads and deletions
-        // Case 1: Delete all existing images if requested
-        if ($request->input('delete_existing_images') === 'true') {
-            foreach ($staff->images as $image) {
-                // Delete the file from storage using the correct path
-                Storage::disk('public')->delete('staff_images/'.$image->image_path);
-                $image->delete();
-            }
-        } 
-        // Case 2: Delete only specific images by ID
-        elseif ($request->has('deleted_image_ids')) {
-            $deletedImageIds = json_decode($request->input('deleted_image_ids'), true);
-            if (is_array($deletedImageIds) && count($deletedImageIds) > 0) {
-                foreach ($staff->images as $image) {
-                    if (in_array($image->id, $deletedImageIds)) {
-                        // Delete the file from storage using the correct path
-                        Storage::disk('public')->delete('staff_images/'.$image->image_path);
-                        $image->delete();
-                    }
-                }
-            }
-        }
-
-        // Add new images
-        if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $image) {
-                // Get original filename
-                $originalName = $image->getClientOriginalName();
-                
-                // Store the image in the staff_images directory
-                $path = $image->storeAs('staff_images', $originalName, 'public');
-                
-                // Store only the filename in the database, not the full path
-                StaffImage::create([
-                    'staff_id' => $staff->id,
-                    'image_path' => $originalName
-                ]);
-            }
-        }
+      
        
         return response()->json([
             'status' => true,
@@ -308,12 +209,7 @@ public function index(Request $request): JsonResponse
             ], 404);
         }
 
-        // Delete associated images
-        foreach ($staff->images as $image) {
-            // Delete the file from storage using the correct path
-            Storage::disk('public')->delete('staff_images/'.$image->image_path);
-            $image->delete();
-        }
+     
 
         $user = User::find($staff->user_id);
         $staff->delete();

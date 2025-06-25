@@ -15,8 +15,11 @@ import { Route as IndexImport } from './routes/index'
 import { Route as StaffIndexImport } from './routes/staff/index'
 import { Route as LoginIndexImport } from './routes/login/index'
 import { Route as DashboardsIndexImport } from './routes/dashboards/index'
+import { Route as CompanyIndexImport } from './routes/company/index'
 import { Route as StaffAddIndexImport } from './routes/staff/add/index'
+import { Route as CompanyAddIndexImport } from './routes/company/add/index'
 import { Route as StaffEditIdImport } from './routes/staff/edit/$id'
+import { Route as CompanyEditIdImport } from './routes/company/edit/$id'
 
 // Create/Update Routes
 
@@ -44,15 +47,33 @@ const DashboardsIndexRoute = DashboardsIndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const CompanyIndexRoute = CompanyIndexImport.update({
+  id: '/company/',
+  path: '/company/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const StaffAddIndexRoute = StaffAddIndexImport.update({
   id: '/staff/add/',
   path: '/staff/add/',
   getParentRoute: () => rootRoute,
 } as any)
 
+const CompanyAddIndexRoute = CompanyAddIndexImport.update({
+  id: '/company/add/',
+  path: '/company/add/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const StaffEditIdRoute = StaffEditIdImport.update({
   id: '/staff/edit/$id',
   path: '/staff/edit/$id',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const CompanyEditIdRoute = CompanyEditIdImport.update({
+  id: '/company/edit/$id',
+  path: '/company/edit/$id',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -65,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/company/': {
+      id: '/company/'
+      path: '/company'
+      fullPath: '/company'
+      preLoaderRoute: typeof CompanyIndexImport
       parentRoute: typeof rootRoute
     }
     '/dashboards/': {
@@ -88,11 +116,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffIndexImport
       parentRoute: typeof rootRoute
     }
+    '/company/edit/$id': {
+      id: '/company/edit/$id'
+      path: '/company/edit/$id'
+      fullPath: '/company/edit/$id'
+      preLoaderRoute: typeof CompanyEditIdImport
+      parentRoute: typeof rootRoute
+    }
     '/staff/edit/$id': {
       id: '/staff/edit/$id'
       path: '/staff/edit/$id'
       fullPath: '/staff/edit/$id'
       preLoaderRoute: typeof StaffEditIdImport
+      parentRoute: typeof rootRoute
+    }
+    '/company/add/': {
+      id: '/company/add/'
+      path: '/company/add'
+      fullPath: '/company/add'
+      preLoaderRoute: typeof CompanyAddIndexImport
       parentRoute: typeof rootRoute
     }
     '/staff/add/': {
@@ -109,29 +151,38 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/company': typeof CompanyIndexRoute
   '/dashboards': typeof DashboardsIndexRoute
   '/login': typeof LoginIndexRoute
   '/staff': typeof StaffIndexRoute
+  '/company/edit/$id': typeof CompanyEditIdRoute
   '/staff/edit/$id': typeof StaffEditIdRoute
+  '/company/add': typeof CompanyAddIndexRoute
   '/staff/add': typeof StaffAddIndexRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/company': typeof CompanyIndexRoute
   '/dashboards': typeof DashboardsIndexRoute
   '/login': typeof LoginIndexRoute
   '/staff': typeof StaffIndexRoute
+  '/company/edit/$id': typeof CompanyEditIdRoute
   '/staff/edit/$id': typeof StaffEditIdRoute
+  '/company/add': typeof CompanyAddIndexRoute
   '/staff/add': typeof StaffAddIndexRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/company/': typeof CompanyIndexRoute
   '/dashboards/': typeof DashboardsIndexRoute
   '/login/': typeof LoginIndexRoute
   '/staff/': typeof StaffIndexRoute
+  '/company/edit/$id': typeof CompanyEditIdRoute
   '/staff/edit/$id': typeof StaffEditIdRoute
+  '/company/add/': typeof CompanyAddIndexRoute
   '/staff/add/': typeof StaffAddIndexRoute
 }
 
@@ -139,45 +190,60 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/company'
     | '/dashboards'
     | '/login'
     | '/staff'
+    | '/company/edit/$id'
     | '/staff/edit/$id'
+    | '/company/add'
     | '/staff/add'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/company'
     | '/dashboards'
     | '/login'
     | '/staff'
+    | '/company/edit/$id'
     | '/staff/edit/$id'
+    | '/company/add'
     | '/staff/add'
   id:
     | '__root__'
     | '/'
+    | '/company/'
     | '/dashboards/'
     | '/login/'
     | '/staff/'
+    | '/company/edit/$id'
     | '/staff/edit/$id'
+    | '/company/add/'
     | '/staff/add/'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CompanyIndexRoute: typeof CompanyIndexRoute
   DashboardsIndexRoute: typeof DashboardsIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   StaffIndexRoute: typeof StaffIndexRoute
+  CompanyEditIdRoute: typeof CompanyEditIdRoute
   StaffEditIdRoute: typeof StaffEditIdRoute
+  CompanyAddIndexRoute: typeof CompanyAddIndexRoute
   StaffAddIndexRoute: typeof StaffAddIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CompanyIndexRoute: CompanyIndexRoute,
   DashboardsIndexRoute: DashboardsIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   StaffIndexRoute: StaffIndexRoute,
+  CompanyEditIdRoute: CompanyEditIdRoute,
   StaffEditIdRoute: StaffEditIdRoute,
+  CompanyAddIndexRoute: CompanyAddIndexRoute,
   StaffAddIndexRoute: StaffAddIndexRoute,
 }
 
@@ -192,15 +258,21 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/company/",
         "/dashboards/",
         "/login/",
         "/staff/",
+        "/company/edit/$id",
         "/staff/edit/$id",
+        "/company/add/",
         "/staff/add/"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/company/": {
+      "filePath": "company/index.tsx"
     },
     "/dashboards/": {
       "filePath": "dashboards/index.tsx"
@@ -211,8 +283,14 @@ export const routeTree = rootRoute
     "/staff/": {
       "filePath": "staff/index.tsx"
     },
+    "/company/edit/$id": {
+      "filePath": "company/edit/$id.tsx"
+    },
     "/staff/edit/$id": {
       "filePath": "staff/edit/$id.tsx"
+    },
+    "/company/add/": {
+      "filePath": "company/add/index.tsx"
     },
     "/staff/add/": {
       "filePath": "staff/add/index.tsx"

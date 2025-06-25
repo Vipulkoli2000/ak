@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { useGetData } from "@/Components/HTTP/GET";
+import axios from "axios";
 import Dashboard from "./Dashboardreuse";
 import userAvatar from "@/images/Profile.jpg";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useNavigate } from "@tanstack/react-router";
 import {
   Pagination,
@@ -22,7 +21,7 @@ export default function Dashboardholiday() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const token = localStorage.getItem("token");
   const typeofschema = {
     profile_name: "String",
     institute_id: "String",
@@ -44,55 +43,43 @@ export default function Dashboardholiday() {
   });
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Data fetching using shared GET hook
-  const {
-    data: apiResponse,
-    isLoading: queryLoading,
-    isError: queryError,
-    refetch,
-  } = useGetData({
-    endpoint: `/api/staff${searchQuery ? `?search=${searchQuery}&` : "?"}page=${paginationState.currentPage}`,
-    params: {
-      queryKey: ["staff", searchQuery, paginationState.currentPage],
-      onSuccess: (response: any) => {
-        if (response.data) {
-          setData(response.data.Staff);
-          const pagination = response.data.Pagination;
-          setPaginationState({
-            currentPage: Number(pagination.current_page),
-            totalPages: Number(pagination.last_page),
-            perPage: Number(pagination.per_page),
-            total: Number(pagination.total),
-          });
+  const fetchData = async (query: string = "", page: number = 1) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(
+        `/api/companies${query ? `?search=${query}&` : "?"}page=${page}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-      },
-      onError: (err: any) => {
-        console.error("Error fetching data:", err);
-        setError(err);
-      },
-    },
-  });
+      );
 
-  useEffect(() => {
-    setLoading(queryLoading);
-  }, [queryLoading]);
+      if (response.data.data) {
+        setData(response.data.data.Company);
 
-  useEffect(() => {
-    if (queryError) {
-      setError(queryError as any);
+        // Update pagination state
+        const pagination = response.data.data.Pagination;
+        setPaginationState({
+          currentPage: Number(pagination.current_page),
+          totalPages: Number(pagination.last_page),
+          perPage: Number(pagination.per_page),
+          total: Number(pagination.total),
+        });
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error("Error fetching data:", err);
+      setError(err);
+      setLoading(false);
     }
-  }, [queryError]);
-
-  // Wrapper function – we now rely on the shared GET hook for actual fetching
-  const fetchData = (query: string = "", page: number = 1) => {
-    setSearchQuery(query);
-    setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
-  // Refetch whenever search query or page changes
   useEffect(() => {
-    refetch();
-  }, [searchQuery, paginationState.currentPage]);
+    fetchData(searchQuery, paginationState.currentPage);
+  }, [token]); // Keep token as the only dependency
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -124,13 +111,13 @@ export default function Dashboardholiday() {
       breadcrumbs: [
         { label: "Home", href: "/dashboards" },
         { label: "/", href: "" },
-        { label: "Staff" },
+        { label: "Company" },
       ],
-      searchPlaceholder: "Search staff...",
+      searchPlaceholder: "Search Company...",
       userAvatar: "/path-to-avatar.jpg",
       tableColumns: {
-        title: `Staff`,
-        description: "Manage staff  and view their details.",
+        title: `Company`,
+        description: "Manage Company  and view their details.",
         headers: [
           { label: "Name", key: "one" },
           { label: "Email", key: "two" },
@@ -163,7 +150,7 @@ export default function Dashboardholiday() {
   const handleAddProduct = () => {
     console.log("Add Registration clicked");
     console.log("AS");
-    navigate({ to: "/staff/add" });
+    navigate({ to: "/company/add" });
     // For example, navigate to an add registration page or open a modal
   };
 
@@ -186,37 +173,7 @@ export default function Dashboardholiday() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4 p-4">
-        {/* Header skeleton */}
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-6 w-1/3" />
-          <Skeleton className="h-10 w-24" />
-        </div>
-
-        {/* Table skeleton */}
-        <div className="border rounded-md divide-y">
-          {[...Array(10)].map((_, idx) => (
-            <div key={idx} className="flex items-center p-4 space-x-4">
-              <Skeleton className="h-10 w-10 rounded-full" />
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-4 w-1/4" />
-              <Skeleton className="h-4 w-1/5" />
-              <Skeleton className="h-8 w-16 ml-auto" />
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination skeleton */}
-        <div className="flex justify-center space-x-2">
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
-          <Skeleton className="h-8 w-8" />
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <div className="p-4">Loading...</div>;
   if (error)
     return <div className="p-4 text-red-500">Error loading registrations.</div>;
   if (!config) return <div className="p-4">Loading configuration...</div>;
@@ -248,7 +205,7 @@ export default function Dashboardholiday() {
       three: capital(item?.is_teaching === "0" ? "Yes" : "No"),
       four: capital(item?.role || "Unknown"),
       delete:
-        item?.role?.toLowerCase() !== "admin" ? "/staff/" + item?.id : null,
+        item?.role?.toLowerCase() !== "admin" ? "/companies/" + item?.id : null,
     };
   });
 
