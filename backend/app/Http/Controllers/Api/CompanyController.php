@@ -161,9 +161,13 @@ class CompanyController extends BaseController
             $company = company::find($request->companyId);
 
             // Send a simple text email. Replace with Mailable if you need rich content.
-            Mail::raw('Hi sanmisha here', function ($message) use ($request) {
+            Mail::raw('Please find the brochure attached.', function ($message) use ($request) {
                 $message->to($request->email)
-                        ->subject('Company Brochure');
+                        ->subject('Company Brochure')
+                        ->attach(base_path('pdf/blank.pdf'), [
+                            'as' => 'CompanyBrochure.pdf',
+                            'mime' => 'application/pdf',
+                        ]);
             });
 
             return $this->sendResponse([], 'Brochure sent successfully');
