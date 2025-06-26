@@ -45,7 +45,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "@tanstack/react-router"; 
 import { EmptyState } from "@/components/ui/empty-state";
 import {
-  FileText,
   MessageSquare,
   Mail,
   Image,
@@ -173,41 +172,6 @@ export default function Dashboard({
       handleSearchClick();
     }
   };
-
-  const handleDownloadPdf = async (staffId: number | string) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(`/api/staff/${staffId}/pdf`, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : undefined,
-        },
-        responseType: "blob", // Ensure the response is a blob (PDF file)
-      });
-
-      const blob = response.data;
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-
-      const currentDate = new Date();
-      const day = ("0" + currentDate.getDate()).slice(-2);
-      const month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
-      const year = currentDate.getFullYear();
-      const formattedDate = `${day}-${month}-${year}`;
-
-      link.href = url;
-      link.download = `Staff_${staffId}_${formattedDate}.pdf`;
-
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success("PDF downloaded successfully");
-    } catch (error) {
-      console.error("Failed to download PDF", error);
-      toast.error("Failed to download PDF");
-    }
-  };
-  
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background/30">
@@ -358,9 +322,7 @@ export default function Dashboard({
                               </div>
                             </TableHead>
                           ))}
-                          <TableHead className="text-xs font-medium text-muted-foreground py-3">
-                            PDF
-                          </TableHead>
+
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -448,14 +410,6 @@ export default function Dashboard({
                                   )}
                                 </TableCell>
                               ))}
-                              <TableCell>
-                                <button
-                                  onClick={() => handleDownloadPdf(row.id)}
-                                  style={{ border: 'none', background: 'transparent' }}
-                                >
-                                <FileText/>
-                                </button>
-                              </TableCell>
                             </TableRow>
                           </React.Fragment>
                         ))}

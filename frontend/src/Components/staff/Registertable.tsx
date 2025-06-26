@@ -15,10 +15,35 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+interface Breadcrumb {
+  label: string;
+  href?: string;
+}
+
+interface TableColumnHeader {
+  label: string;
+  key: string;
+}
+
+interface TableColumns {
+  title: string;
+  description: string;
+  headers: TableColumnHeader[];
+  actions: { label: string; value: string }[];
+  pagination: any;
+}
+
+interface DashboardConfig {
+  breadcrumbs: Breadcrumb[];
+  searchPlaceholder: string;
+  userAvatar: string;
+  tableColumns: TableColumns;
+}
+
 export default function Dashboardholiday() {
   const user = localStorage.getItem("user");
   const User = JSON.parse(user);
-  const [config, setConfig] = useState(null);
+  const [config, setConfig] = useState<DashboardConfig | null>(null);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,8 +53,7 @@ export default function Dashboardholiday() {
     institute_id: "String",
     email: "String",
     name: "String",
-    is_teaching: "Boolean",
-    data_of_birth: "String",
+     data_of_birth: "String",
     address: "String",
     mobile: "String",
     alternate_mobile: "String",
@@ -149,8 +173,7 @@ export default function Dashboardholiday() {
         headers: [
           { label: "Name", key: "one" },
           { label: "Email", key: "two" },
-          { label: "Teaching", key: "three" },
-          { label: "Role", key: "four" },
+           { label: "Role", key: "four" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -182,10 +205,7 @@ export default function Dashboardholiday() {
     // For example, navigate to an add registration page or open a modal
   };
 
-  const handleExport = () => {
-    console.log("Export clicked");
-    // Implement export functionality such as exporting data as CSV or PDF
-  };
+
 
   const handleFilterChange = (filterValue) => {
     console.log(`Filter changed: ${filterValue}`);
@@ -260,8 +280,7 @@ export default function Dashboardholiday() {
       id: item?.id,
       one: capital(item?.name || "NA"),
       two: capital(item?.email || "NA"),
-      three: capital(item?.is_teaching === "0" ? "Yes" : "No"),
-      four: capital(item?.role || "Unknown"),
+       four: capital(item?.role || "Unknown"),
       delete:
         item?.role?.toLowerCase() !== "admin" ? "/staff/" + item?.id : null,
     };
@@ -276,7 +295,7 @@ export default function Dashboardholiday() {
         tableColumns={config.tableColumns}
         tableData={mappedTableData}
         onAddProduct={handleAddProduct}
-        onExport={handleExport}
+
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         onSearch={handleSearch}

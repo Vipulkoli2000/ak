@@ -26,10 +26,10 @@ Route::group(['middleware'=>['auth:sanctum', 'permission','request.null']], func
    Route::get('/all_companies', [CompanyController::class, 'allCompany'])->name("companys.all");
    // Company resource routes
    Route::resource('companies', CompanyController::class);
-
+   //followup
    Route::resource('followup', FollowUpController::class);
    Route::get('/all_followup', [FollowUpController::class, 'allFollowup'])->name("followups.all");
- 
+   
 
    // Dashboard route
    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.data');

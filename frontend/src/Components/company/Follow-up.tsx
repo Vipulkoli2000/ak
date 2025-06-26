@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
 import { useGetData } from "@/Components/HTTP/GET";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
+import { Skeleton } from "@/Components/ui/skeleton";
 import { useEffect, useState } from "react";
 
 const followUpFormSchema = z.object({
@@ -182,6 +183,37 @@ function FollowUpForm({ companyId }: { companyId?: number }) {
   );
 }
 
+function FollowUpHistorySkeleton() {
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead><Skeleton className="h-4 w-10" /></TableHead>
+            <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+            <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+            <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+            <TableHead><Skeleton className="h-4 w-48" /></TableHead>
+            <TableHead><Skeleton className="h-4 w-40" /></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[...Array(5)].map((_, index) => (
+            <TableRow key={index}>
+              <TableCell><Skeleton className="h-4 w-10" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-48" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
 function FollowUpHistory({ companyId }: { companyId?: number }) {
   const { data, isLoading, error } = useGetData({
      endpoint: `/api/followup?company_id=${companyId}`,
@@ -195,7 +227,7 @@ function FollowUpHistory({ companyId }: { companyId?: number }) {
     }
   }, [data]);
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <FollowUpHistorySkeleton />;
   if (error) return <div>Error loading follow-ups.</div>;
 
   return (
