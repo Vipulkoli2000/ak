@@ -24,8 +24,14 @@ return new class extends Migration
             $table->string('type_of_company')->nullable();
             $table->string('other_type_of_company')->nullable();
             $table->string('contact_person')->nullable();
+            $table->string('contact_person_designation')->nullable();
             $table->string('contact_email')->nullable();
             $table->string('contact_mobile')->nullable();
+            $table->string('alternate_contact_person')->nullable();
+            $table->string('alternate_contact_person_designation')->nullable();
+            $table->string('alternate_contact_email')->nullable();
+            $table->string('alternate_contact_mobile')->nullable();
+
 
             $table->timestamps();
         });

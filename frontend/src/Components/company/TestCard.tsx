@@ -47,12 +47,22 @@ const profileFormSchema = z
     type_of_company: z.string().nonempty("Type of Company is Required"),
     other_type_of_company: z.string().optional(),
     contact_person: z.string().nonempty("Contact Person is Required"),
+    contact_person_designation: z.string().nonempty("Contact Person's Designation is Required"),
     contact_email: z
       .string()
       .email({ message: "Invalid email address" })
       .or(z.literal(""))
       .optional(),
     contact_mobile: z.string().nonempty("Contact Mobile is Required"),
+    alternate_contact_person: z.any().optional(),
+    alternate_contact_person_designation: z.any().optional(),
+    alternate_contact_email: z
+      .string()
+      .email({ message: "Invalid email address" })
+      .or(z.literal(""))
+      .optional(),
+      alternate_contact_mobile: z.any().optional(),
+
   })
   .refine(
     (data) => {
@@ -84,8 +94,13 @@ const defaultValues: Partial<ProfileFormValues> = {
   type_of_company: "",
   other_type_of_company: "",
   contact_person: "",
+  contact_person_designation: "",
   contact_email: "",
   contact_mobile: "",
+  alternate_contact_person: "",
+  alternate_contact_person_designation: "",
+  alternate_contact_email: "",
+  alternate_contact_mobile: "",
 };
 
 function ProfileForm() {
@@ -148,8 +163,13 @@ function ProfileForm() {
     data.country = data.country;
     data.type_of_company = data.type_of_company;
     data.contact_person = data.contact_person;
+    data.contact_person_designation = data.contact_person_designation;
     data.contact_email = data.contact_email;
     data.contact_mobile = data.contact_mobile;
+    data.alternate_contact_person = data.alternate_contact_person;
+    data.alternate_contact_person_designation = data.alternate_contact_person_designation;
+    data.alternate_contact_email = data.alternate_contact_email;
+    data.alternate_contact_mobile = data.alternate_contact_mobile;
 
     // Build multipart form data from all defined values
     const formData = new FormData();
@@ -339,7 +359,7 @@ function ProfileForm() {
                 <CardTitle>Contact Information</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-3 ">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-4 ">
                 <FormField
                   control={form.control}
                   name="contact_person"
@@ -348,6 +368,20 @@ function ProfileForm() {
                       <FormLabel>Contact Person<span className="text-red-500">*</span></FormLabel>
                     <Input
                       placeholder="Enter Contact Person..."
+                      {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contact_person_designation"
+                  render={({ field }: { field: ControllerRenderProps<ProfileFormValues, "contact_person_designation"> }) => (
+                    <FormItem className="">
+                      <FormLabel>Contact Person Designation<span className="text-red-500">*</span></FormLabel>
+                    <Input
+                      placeholder="Enter Contact Person Designation..."
                       {...field}
                       />
                       <FormMessage />
@@ -374,6 +408,62 @@ function ProfileForm() {
                   render={({ field }: { field: ControllerRenderProps<ProfileFormValues, "contact_mobile"> }) => (
                     <FormItem className="">
                       <FormLabel>Contact Mobile<span className="text-red-500">*</span></FormLabel>
+                    <Input
+                      placeholder="Enter Contact Mobile..."
+                      {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="alternate_contact_person"
+                  render={({ field }: { field: ControllerRenderProps<ProfileFormValues, "alternate_contact_person"> }) => (
+                    <FormItem className="">
+                      <FormLabel>Alternate Contact Person</FormLabel>
+                    <Input
+                      placeholder="Enter Contact Person..."
+                      {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="alternate_contact_person_designation"
+                  render={({ field }: { field: ControllerRenderProps<ProfileFormValues, "alternate_contact_person_designation"> }) => (
+                    <FormItem className="">
+                      <FormLabel>Alternate Contact Person's Designation</FormLabel>
+                    <Input
+                      placeholder="Enter Contact Person..."
+                      {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="alternate_contact_email"
+                  render={({ field }: { field: ControllerRenderProps<ProfileFormValues, "alternate_contact_email"> }) => (
+                    <FormItem className="">
+                      <FormLabel>Alternate Contact Email</FormLabel>
+                    <Input
+                      placeholder="Enter Contact Email..."
+                      {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="alternate_contact_mobile"
+                  render={({ field }: { field: ControllerRenderProps<ProfileFormValues, "alternate_contact_mobile"> }) => (
+                    <FormItem className="">
+                      <FormLabel>Alternate Contact Mobile</FormLabel>
                     <Input
                       placeholder="Enter Contact Mobile..."
                       {...field}

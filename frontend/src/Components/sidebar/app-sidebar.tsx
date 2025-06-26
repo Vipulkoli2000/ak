@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { NotificationPopover } from "../ui/notification-popover";
+// import { NotificationPopover } from "../ui/notification-popover";
 import {
   Sidebar,
   SidebarContent,
@@ -216,7 +216,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
               <span className="text-xs">CTRL</span>+ K
             </kbd>
           </button>
-          <NotificationPopover />
+          {/* <NotificationPopover /> */}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-md hover:bg-accent focus:outline-none"

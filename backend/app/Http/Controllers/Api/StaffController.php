@@ -69,7 +69,7 @@ public function index(Request $request): JsonResponse
 }
 
 
-    public function store(Request $request): JsonResponse
+    public function store(StaffRequest $request): JsonResponse
     {
         // Create a new user
         $active = 1;
@@ -133,7 +133,7 @@ public function index(Request $request): JsonResponse
     /**
      * Update Staff.
      */
-    public function update(Request $request, string $id): JsonResponse
+    public function update(StaffRequest $request, string $id): JsonResponse
     {
         $staff = Staff::find($id);
 

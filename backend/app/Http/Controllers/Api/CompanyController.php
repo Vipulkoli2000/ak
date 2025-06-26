@@ -58,8 +58,13 @@ class CompanyController extends BaseController
         $company->type_of_company = $request->input('type_of_company');
         $company->other_type_of_company = $request->input('other_type_of_company');
         $company->contact_person = $request->input('contact_person');
+        $company->contact_person_designation = $request->input('contact_person_designation');
         $company->contact_email = $request->input('contact_email');
         $company->contact_mobile = $request->input('contact_mobile');
+        $company->alternate_contact_person = $request->input('alternate_contact_person');
+        $company->alternate_contact_person_designation = $request->input('alternate_contact_person_designation');
+        $company->alternate_contact_email = $request->input('alternate_contact_email');
+        $company->alternate_contact_mobile = $request->input('alternate_contact_mobile');
          $company->save();
         
         return $this->sendResponse([new CompanyResource($company)], "Company stored successfully");
@@ -99,8 +104,15 @@ class CompanyController extends BaseController
         $company->type_of_company = $request->input('type_of_company');
         $company->other_type_of_company = $request->input('other_type_of_company');
         $company->contact_person = $request->input('contact_person');
+        $company->contact_person_designation = $request->input('contact_person_designation');
         $company->contact_email = $request->input('contact_email');
         $company->contact_mobile = $request->input('contact_mobile');
+        $company->alternate_contact_person = $request->input('alternate_contact_person');
+        $company->alternate_contact_person_designation = $request->input('alternate_contact_person_designation');
+        $company->alternate_contact_email = $request->input('alternate_contact_email');
+        $company->alternate_contact_mobile = $request->input('alternate_contact_mobile');
+
+
            
         $company->save();
        
@@ -198,6 +210,7 @@ class CompanyController extends BaseController
                     $company->pincode = trim($row[$columnMap['pincode']]);
                     $company->contact_person = trim($row[$columnMap['contact_person']]);
                     $company->contact_mobile = trim($row[$columnMap['contact_mobile']]);
+                    
                                         $company->save();
                     
                     $importCount++;

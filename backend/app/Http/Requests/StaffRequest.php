@@ -2,11 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Staff;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Support\Facades\Log;
 
 class StaffRequest extends FormRequest
 {
@@ -25,74 +21,21 @@ class StaffRequest extends FormRequest
      */
     public function rules(): array
     {
-        // Log all input for debugging
-        Log::info('Request data in StaffRequest:', $this->except(['images']));
-        
         $rules = [
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
             'staff_name' => 'required|string|max:255',
-             'date_of_birth' => 'required|date',
-            'address' => 'required|string',
-            'mobile' => 'required|string',
-            'role' => 'required|string|',
-
-            'images.*' => 'image|mimes:jpeg,png,jpg|max:2048', // Max 2MB per image
-            'images' => 'array|max:5', // Maximum 5 images allowed
-            'education' => 'nullable', // Allow any format initially to debug
+            'email' => 'required|string|email|max:255|unique:users,email',
         ];
 
-      
-
-    
-
-        if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-            $staff = Staff::find($this->route('staff'));
-            // For update, we only require certain fields
-            $updateRules = [
-                'staff_name' => [
-                    'required',
-                    'unique:staff,staff_name,' . $this->route('staff'),
-                ],
-                'email' => [
-                    'required',
-                    'email',
-                    'unique:users,email,' . $staff->user_id
-                ],
-            ];
-            
-            // Merge the basic rules with update-specific rules
-            $rules = array_merge($rules, $updateRules);
-        }
-    
         return $rules;
     }
-    
-    public function messages(): array
+
+    public function messages()
     {
         return [
-            'images.*.image' => 'Each file must be an image',
-            'images.*.mimes' => 'Allowed image formats are: jpeg, png, jpg',
-            'images.*.max' => 'Each image must not exceed 2MB',
-            'images.max' => 'You cannot upload more than 5 images',
-            'education.*.qualification.required_with' => 'The qualification field is required when adding education details',
-            'education.*.college_name.required_with' => 'The college name field is required when adding education details',
-            'education.*.board_university.required_with' => 'The board/university field is required when adding education details',
-            'education.*.passing_year.required_with' => 'The passing year field is required when adding education details',
-            'education.*.percentage.required_with' => 'The percentage field is required when adding education details',
+            'staff_name.required' => 'Name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Email must be a valid email address.',
+            'email.unique' => 'Email already exists.',
         ];
-    }
-
-    protected function failedValidation(Validator $validator)
-    {
-        Log::warning('Validation failed in StaffRequest:', $validator->errors()->toArray());
-        
-        throw new HttpResponseException(
-            response()->json([
-                'status' => false,
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422)
-        );
     }
 }
