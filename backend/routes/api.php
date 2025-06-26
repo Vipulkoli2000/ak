@@ -19,8 +19,12 @@ Route::group(['middleware'=>['auth:sanctum', 'permission','request.null']], func
    Route::resource('staff', StaffController::class);  
    Route::get('/all_staff', [StaffController::class, 'allStaffs'])->name("staffs.all");
 
-   Route::resource('companies', CompanyController::class);  
+      // Company custom routes (keep before resource to avoid conflict)
+   Route::post('/companies/importCompany', [CompanyController::class, 'importCompany'])->name('companies.import');
+   Route::get('/companies/download-template', [CompanyController::class, 'downloadTemplate'])->name('companies.download-template');
    Route::get('/all_companies', [CompanyController::class, 'allCompany'])->name("companys.all");
+   // Company resource routes
+   Route::resource('companies', CompanyController::class);
  
 
    // Dashboard route

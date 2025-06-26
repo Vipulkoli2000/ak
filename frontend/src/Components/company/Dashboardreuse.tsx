@@ -23,6 +23,14 @@ import {
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -108,11 +116,75 @@ export default function Dashboard({
   const [toggleopen, setToggleopen] = useState(false);
   const [localSearchTerm, setLocalSearchTerm] = useState("");
 
+  // Import dialog states
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!selectedFile) return;
+    try {
+      setImporting(true);
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const token = localStorage.getItem("token");
+      await axios.post("/api/companies/importCompany", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+      });
+
+      toast.success("Companies imported successfully");
+      setImportDialogOpen(false);
+      setSelectedFile(null);
+      if (fetchData) {
+        fetchData();
+      }
+    } catch (error) {
+      console.error("Import failed:", error);
+      toast.error("Failed to import companies");
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("/api/companies/download-template", {
+        responseType: "blob",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "companies_template.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading template:", error);
+      toast.error("Failed to download template");
+    }
+  };
+
   const iconClasses =
     "text-xl text-default-500 pointer-events-none flex-shrink-0";
 
   // State to manage expanded rows (array of id)
   const [expandedRows, setExpandedRows] = useState([]);
+
   
   // Helper function to check if a row has admin role
   const hasAdminRole = (row: any) => {
@@ -290,6 +362,44 @@ export default function Dashboard({
                     </Button>
                   </div>
                 </div>
+                {/* Import Companies Dialog */}
+                <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      color="primary"
+                      variant="solid"
+                      startContent={<FileSymlink size={16} />}
+                      className="h-9"
+                    >
+                      Import
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="bg-white">
+                    <DialogHeader>
+                      <DialogTitle>Import Companies Details</DialogTitle>
+                    </DialogHeader>
+                    <Input
+                      type="file"
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleFileChange}
+                    />
+                    <DialogFooter>
+                    <Button
+                        type="button"
+                        onClick={handleDownloadTemplate}
+                      >
+                        Download Excel
+                      </Button>
+                      <Button
+                        onPress={handleImport}
+                        isDisabled={!selectedFile || importing}
+                      >
+                        {importing ? "Importing..." : "Import Excel"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
                 <Button
                   color="primary"
                   variant="solid"
