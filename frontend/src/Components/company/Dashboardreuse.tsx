@@ -121,6 +121,11 @@ export default function Dashboard({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
 
+  // Send Brochure dialog states
+  const [brochureDialogOpen, setBrochureDialogOpen] = useState(false);
+  const [brochureEmail, setBrochureEmail] = useState<string>("");
+  const [brochureRow, setBrochureRow] = useState<any>(null);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
@@ -181,6 +186,33 @@ export default function Dashboard({
 
   const iconClasses =
     "text-xl text-default-500 pointer-events-none flex-shrink-0";
+
+  const handleSendBrochureClick = (row: any) => {
+    setBrochureRow(row);
+    setBrochureEmail(row?.two || ""); // assuming 'two' holds email
+    setBrochureDialogOpen(true);
+  };
+
+  const handleSendBrochure = async () => {
+    if (!brochureEmail) return;
+    try {
+      const token = localStorage.getItem("token");
+      await axios.post(
+        "/api/companies/send-brochure",
+        { companyId: brochureRow?.id, email: brochureEmail },
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : undefined,
+          },
+        }
+      );
+      toast.success("Brochure sent successfully");
+      setBrochureDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to send brochure", error);
+      toast.error("Failed to send brochure");
+    }
+  };
 
   // State to manage expanded rows (array of id)
   const [expandedRows, setExpandedRows] = useState([]);
@@ -520,7 +552,16 @@ export default function Dashboard({
                                   ) : header.key === "two" ? (
                                     row.two
                                   ) : header.key === "three" ? (
-                                    row.three
+                                    <div className="flex items-center gap-2">
+                                     {row.three}
+                                     <Button
+                                       size="sm"
+                                       variant="flat"
+                                       onPress={() => handleSendBrochureClick(row)}
+                                     >
+                                       Send Brochure
+                                     </Button>
+                                   </div>
                                   ) : header.key === "four" ? (
                                     row.four
                                   ) : header.key === "five" ? (
@@ -571,7 +612,27 @@ export default function Dashboard({
                   </CardFooter>
                 </Card>
               )}
-            </TabsContent>
+             {/* Send Brochure Dialog */}
+             <Dialog open={brochureDialogOpen} onOpenChange={setBrochureDialogOpen}>
+               <DialogContent className="bg-white">
+                 <DialogHeader>
+                   <DialogTitle>Send Brochure</DialogTitle>
+                 </DialogHeader>
+                 <div className="space-y-4">
+                   <Input
+                     type="email"
+                     placeholder="Recipient Email"
+                     value={brochureEmail}
+                     onChange={(e) => setBrochureEmail(e.target.value)}
+                   />
+                 </div>
+                 <DialogFooter>
+                   <Button onPress={handleSendBrochure}>Send Mail</Button>
+                 </DialogFooter>
+               </DialogContent>
+             </Dialog>
+
+             </TabsContent>
             {/* Add more TabsContent as needed */}
           </Tabs>
         </main>

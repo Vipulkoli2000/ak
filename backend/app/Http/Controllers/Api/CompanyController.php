@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\CompanyResource;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Api\BaseController;
 
 class CompanyController extends BaseController
@@ -141,6 +142,34 @@ class CompanyController extends BaseController
             ["Company" => CompanyResource::collection($company)],
             "Company retrieved successfully"
         );
+    }
+
+    public function sendBrochure(Request $request): JsonResponse
+    {
+        // Validate request data
+        $validator = Validator::make($request->all(), [
+            'companyId' => 'required|exists:companies,id',
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error', $validator->errors(), 422);
+        }
+
+        try {
+            // You can use the company data if needed in the email
+            $company = company::find($request->companyId);
+
+            // Send a simple text email. Replace with Mailable if you need rich content.
+            Mail::raw('Hi sanmisha here', function ($message) use ($request) {
+                $message->to($request->email)
+                        ->subject('Company Brochure');
+            });
+
+            return $this->sendResponse([], 'Brochure sent successfully');
+        } catch (\Exception $e) {
+            return $this->sendError('Mail Error', ['error' => $e->getMessage()], 500);
+        }
     }
 
     public function importCompany(Request $request): JsonResponse
