@@ -26,7 +26,7 @@ export default function AlertDialogbox({
 
    const queryClient = useQueryClient();
   const DeleteApi = async () => {
-     await axios.delete(`/api/staff/${url}`, {
+     await axios.delete(`/api/companies/${url}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -35,7 +35,7 @@ export default function AlertDialogbox({
     // window.location.reload();
     onClose();
     fetchData();
-    queryClient.invalidateQueries({ queryKey: ["patientmaster"] });
+    queryClient.invalidateQueries({ queryKey: ["companies"] });
   };
 
   useEffect(() => {

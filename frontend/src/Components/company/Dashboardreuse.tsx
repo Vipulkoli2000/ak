@@ -3,12 +3,12 @@ import { Link } from "@tanstack/react-router";
 import {
   PlusCircle,
   Search,
-  Pencil,
-  Trash,
-  MoreHorizontal,
   ChevronDown,
   Ellipsis,
   X,
+  FileText,
+  Files,
+  FileSymlink,
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
@@ -17,21 +17,11 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  BreadcrumbSeparator,
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import MultiSelectorComponent from "./profile";
-
 import {
   Table,
   TableBody,
@@ -39,22 +29,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableFooter,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "@tanstack/react-router"; 
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { useNavigate } from "@tanstack/react-router";
 import { EmptyState } from "@/components/ui/empty-state";
-import {
-  FileText,
-  MessageSquare,
-  Mail,
-  Image,
-  Files,
-  FileQuestion,
-  FileSymlink,
-  Settings,
-} from "lucide-react";
-
 import {
   Dropdown,
   DropdownSection,
@@ -63,9 +41,6 @@ import {
   DropdownItem,
   Button,
   cn,
-  Avatar,
-  Tooltip,
-  useDisclosure,
 } from "@heroui/react";
 
 export const description =
@@ -96,6 +71,33 @@ export default function Dashboard({
   onSearch,
   onKeyPress,
   searchQuery,
+  handlePageChange,
+}: {
+  breadcrumbs?: any[];
+  searchPlaceholder?: string;
+  fetchData?: any;
+  userAvatar?: string;
+  tableColumns?: any;
+  AddItem?: any;
+  Edititem?: any;
+  filterValue?: any;
+  typeofschema?: any;
+  handleNextPage?: any;
+  totalPages?: number;
+  setSearch?: any;
+  setCurrentPage?: any;
+  Searchitem?: any;
+  currentPage?: number;
+  handlePrevPage?: any;
+  tableData?: any[];
+  onAddProduct?: any;
+  onExport?: any;
+  onFilterChange?: any;
+  onProductAction?: any;
+  onSearch?: any;
+  onKeyPress?: any;
+  searchQuery?: string;
+  handlePageChange?: (page: number) => void;
 }) {
    const navigate = useNavigate();
   const [toggleedit, setToggleedit] = useState(false);
@@ -174,7 +176,39 @@ export default function Dashboard({
     }
   };
 
-   
+  const handleDownloadPdf = async (staffId: number | string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`/api/companies/${staffId}/pdf`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+        responseType: "blob", // Ensure the response is a blob (PDF file)
+      });
+
+      const blob = response.data;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      const currentDate = new Date();
+      const day = ("0" + currentDate.getDate()).slice(-2);
+      const month = ("0" + (currentDate.getMonth() + 1)).slice(-2);
+      const year = currentDate.getFullYear();
+      const formattedDate = `${day}-${month}-${year}`;
+
+      link.href = url;
+      link.download = `Company_${staffId}_${formattedDate}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("PDF downloaded successfully");
+    } catch (error) {
+      console.error("Failed to download PDF", error);
+      toast.error("Failed to download PDF");
+    }
+  };
   
 
   return (
@@ -263,7 +297,7 @@ export default function Dashboard({
                   onPress={() => navigate({ to: "/company/add" })}
                   className="h-9"
                 >
-                  Add Company Staff
+                  Add New Company
                 </Button>
               </div>
             </div>
@@ -296,8 +330,8 @@ export default function Dashboard({
               {!tableData || tableData.length <= 0 ? (
                 <EmptyState
                   className="bg-accent/20 border border-border rounded-lg shadow-sm min-w-full min-h-[500px] justify-center items-center"
-                  title="No company Available"
-                  description="You can add a new company to get started."
+                  title="No Company Available"
+                  description="You can add a new Company to get started."
                   icons={[FileText, FileSymlink, Files]}
                   typeofschema={typeofschema}
                 />

@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('pincode')->nullable();
             $table->string('country')->nullable();
             $table->string('type_of_company')->nullable();
+            $table->string('other_type_of_company')->nullable();
             $table->string('contact_person')->nullable();
             $table->string('contact_email')->nullable();
             $table->string('contact_mobile')->nullable();

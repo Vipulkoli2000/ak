@@ -4,12 +4,9 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { MoveLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -29,23 +26,43 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { AxiosError } from "axios";
 import { usePutData } from "@/Components/HTTP/PUT";
 import { useGetData } from "@/Components/HTTP/GET";
 import { toast } from "sonner";
 import { useNavigate, useParams } from "@tanstack/react-router";
 
-const profileFormSchema = z.object({
-  staff_name:     z.string().nonempty("Staff Name is required"),
-  employee_code:  z.string().nonempty("Employee Code is required"),
-  date_of_birth:  z.string().nonempty("Date of Birth is required"),
-  address:        z.string().nonempty("Address is required"),
-  mobile:         z.string().nonempty("Mobile is required"),
-  role:           z.string().nonempty("Role is required"),
-  email:          z.string().nonempty("Email is required").email("Invalid email address"),
-  password:       z.any().optional(),
-});
+const profileFormSchema = z
+  .object({
+    company_name: z.string().nonempty("Company Name is Required"),
+    street_address: z.string().nonempty("Street Address is Required"),
+    area: z.any().optional(),
+    city: z.any().optional(),
+    state: z.string().nonempty("State is Required"),
+    pincode: z.string().nonempty("Pincode is Required"),
+    country: z.string().nonempty("Country is Required"),
+    type_of_company: z.string().nonempty("Type of Company is Required"),
+    other_type_of_company: z.string().optional(),
+    contact_person: z.string().nonempty("Contact Person is Required"),
+    contact_email: z
+      .string()
+      .email({ message: "Invalid email address" })
+      .or(z.literal(""))
+      .optional(),
+    contact_mobile: z.string().nonempty("Contact Mobile is Required"),
+  })
+  .refine(
+    (data) => {
+      if (data.type_of_company === "Other") {
+        return !!data.other_type_of_company && data.other_type_of_company.length > 0;
+      }
+      return true;
+    },
+    {
+      message: "Please specify the other type of company",
+      path: ["other_type_of_company"],
+    }
+  );
 
 type ProfileFormValues = z.infer<typeof profileFormSchema> & {
   name?: string;
@@ -54,33 +71,63 @@ type ProfileFormValues = z.infer<typeof profileFormSchema> & {
 // This can come from your database or API.
 
 function ProfileForm({ formData, id }: { formData: any; id?: string }) {
-  const defaultValues: Partial<ProfileFormValues> = formData;
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    defaultValues,
+    defaultValues: {
+      company_name: "",
+      street_address: "",
+      area: "",
+      city: "",
+      state: "",
+      pincode: "",
+      country: "",
+      type_of_company: "",
+      other_type_of_company: "",
+      contact_person: "",
+      contact_email: "",
+      contact_mobile: "",
+    },
     mode: "onChange",
   });
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+    const typeOfCompany = form.watch("type_of_company");
+
+  useEffect(() => {
+    if (typeOfCompany !== "Other") {
+      form.setValue("other_type_of_company", "");
+    }
+  }, [typeOfCompany, form]);
 
   // Populate form when new data arrives
   useEffect(() => {
     if (formData && Object.keys(formData).length) {
-      form.reset({
-        ...formData,
-        staff_name: formData.staff_name ?? formData.name,
-      });
+      const sanitizedData = {
+        company_name: formData.company_name || "",
+        street_address: formData.street_address || "",
+        area: formData.area || "",
+        city: formData.city || "",
+        state: formData.state || "",
+        pincode: formData.pincode || "",
+        country: formData.country || "",
+        type_of_company: formData.type_of_company || "",
+        other_type_of_company: formData.other_type_of_company || "",
+        contact_person: formData.contact_person || "",
+        contact_email: formData.contact_email || "",
+        contact_mobile: formData.contact_mobile || "",
+      };
+      form.reset(sanitizedData);
     }
-  }, [formData]);
+  }, [formData, form]);
 
   // Setup mutation for updating staff
-  const updateStaffMutation = usePutData({
-    endpoint: `/api/staff/${id}`,
+  const updateCompanyMutation = usePutData({
+    endpoint: `/api/companies/${id}`,
     params: {
+      queryKey: ["companies"],
 
       onSuccess: () => {
-        toast.success("Staff Updated Successfully");
-        navigate({ to: "/staff" });
+        toast.success("Company Updated Successfully");
+        navigate({ to: "/company" });
       },
       onError: (error: AxiosError | any) => {
         if (error.response) {
@@ -104,11 +151,8 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
   });
 
   async function onSubmit(data: ProfileFormValues) {
-    // Attach name field required by backend
-    data.name = data.staff_name;
-
     // Send JSON payload directly (no multipart/form-data)
-    updateStaffMutation.mutate(data);
+    updateCompanyMutation.mutate(data);
   }
 
   return (
@@ -117,28 +161,22 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-8 pb-[2rem]"
       >
-        {" "}
         <div className="max-w-full p-4 space-y-6">
-          {/* Staff Information Card */}
+          {/* Company Information Card */}
           <Card className="w-full">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Staff Information</CardTitle>
-                </div>
-                 
-              </div>
+              <CardTitle>Company Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-5 space-y-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-2 ">
                 <FormField
                   control={form.control}
-                  name="staff_name"
+                  name="company_name"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col justify-center min-h-[100px]">
-                      <FormLabel>Name</FormLabel>
+                    <FormItem >
+                      <FormLabel>Company Name<span className="text-red-500">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Enter Name..." {...field} />
+                        <Input placeholder="Enter Company Name..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -146,140 +184,62 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
                 />
                 <FormField
                   control={form.control}
-                  name="employee_code"
+                  name="type_of_company"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Employee Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter Employee Code..." {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="mobile"
-                  rules={{
-                    required: "Mobile number is required",
-                    pattern: {
-                      value: /^[0-9]{10}$/, // Ensures exactly 10 numeric digits
-                      message:
-                        "Mobile number must be exactly 10 digits and contain only numbers",
-                    },
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="Enter 10-digit mobile number"
-                          maxLength={10} // Prevents input beyond 10 characters
-                          onInput={(e) => {
-                            e.target.value = e.target.value.replace(/\D/g, ""); // Removes non-numeric characters
-                          }}
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Role</FormLabel>
-                      <Select 
-                        onValueChange={(value: string) => {
-                          field.onChange(value);
-                        }} 
-                        value={field.value}
-                        defaultValue={field.value}
-                      >
+                      <FormLabel>Type of Company<span className="text-red-500">*</span></FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select Role">
-                              {field.value ? field.value.charAt(0).toUpperCase() + field.value.slice(1) : ''}
-                            </SelectValue>
+                            <SelectValue placeholder="Select a type of company" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="staff">Staff</SelectItem>
-                          
-                           <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="Merchant Exporter">Merchant Exporter</SelectItem>
+                          <SelectItem value="Merchant cum Manufacturer Exporter">Merchant cum Manufacturer Exporter</SelectItem>
+                          <SelectItem value="Manufacturer Exporter">Manufacturer Exporter</SelectItem>
+                          <SelectItem value="Service Provider">Service Provider</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-               <FormField
-  control={form.control}
-  name="date_of_birth"
-  render={({ field }) => {
-    // Calculate the date 18 years ago
-    const today = new Date();
-    const eighteenYearsAgo = new Date(
-      today.getFullYear() - 18,
-      today.getMonth(),
-      today.getDate()
-    );
-    const maxDate = eighteenYearsAgo.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-
-    return (
-      <FormItem>
-        <FormLabel>
-          Date of Birth<span className="text-red-500">*</span>
-        </FormLabel>
-        <FormControl>
-          <Input
-            id="date_of_birth"
-            type="date"
-            max={maxDate} // Limit to 18 years ago
-            {...field}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    );
-  }}
-/>
-              </div>
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Address..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                {typeOfCompany === "Other" && (
+                  <FormField
+                    control={form.control}
+                    name="other_type_of_company"
+                    render={({ field }) => (
+                      <FormItem className="lg:col-span-2">
+                        <FormLabel>Other Type of Company<span className="text-red-500">*</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="Please specify" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
-              />
+              </div>
             </CardContent>
           </Card>
-          {/* Profile Information Card */}
-          <Card className="w-full ">
+
+          {/* Company Address Card */}
+          <Card className="w-full">
             <CardHeader>
-              <CardTitle>Staff Login Details</CardTitle>
+              <CardTitle>Company Address</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 gap-3 mb-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-3 ">
                 <FormField
                   control={form.control}
-                  name="email"
+                  name="street_address"
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
+                    <FormItem >
+                      <FormLabel >Street Address<span className="text-red-500">*</span></FormLabel>
                       <FormControl>
-                        <Input placeholder="Email..." {...field} />
+                        <Input placeholder="Enter Street Address..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -287,17 +247,127 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
                 />
                 <FormField
                   control={form.control}
-                  name="password"
+                  name="area"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Password</FormLabel>
+                      <FormLabel>Area</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Password..."
-                          type="password"
+                          placeholder="Enter Area..."
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter City..."
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State<span className="text-red-500">*</span></FormLabel>
+                      <Input
+                        placeholder="Enter State..."
+                        {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pincode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pincode<span className="text-red-500">*</span></FormLabel>
+                      <Input
+                        placeholder="Enter Pincode..."
+                        {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Country<span className="text-red-500">*</span></FormLabel>
+                      <Input
+                        placeholder="Enter Country..."
+                        {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information Card */}
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle>Contact Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-3 ">
+                <FormField
+                  control={form.control}
+                  name="contact_person"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Person<span className="text-red-500">*</span></FormLabel>
+                      <Input
+                        placeholder="Enter Contact Person..."
+                        {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contact_email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Email</FormLabel>
+                      <Input
+                        placeholder="Enter Contact Email..."
+                        {...field}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="contact_mobile"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact Mobile<span className="text-red-500">*</span></FormLabel>
+                      <Input
+                        placeholder="Enter Contact Mobile..."
+                        {...field}
+                      />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -308,14 +378,14 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
         </div>
         <div className="flex justify-end w-full gap-3 ">
           <Button
-            onClick={() => navigate({ to: "/staff" })}
+            onClick={() => navigate({ to: "/company" })}
             className="self-center"
             type="button"
           >
             Cancel
           </Button>
           <Button className="self-center mr-8" type="submit">
-            Update Staff
+            Update Company
           </Button>
         </div>
       </form>
@@ -325,18 +395,18 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
 
 export default function SettingsProfilePage() {
   const navigate = useNavigate();
-  const { id } = useParams({ from: "/staff/edit/$id" });
+  const { id } = useParams({ from: "/company/edit/$id" });
   const [formData, setFormData] = useState<any>({});
 
   // Fetch staff details
   useGetData({
-    endpoint: `/api/staff/${id}`,
+    endpoint: `/api/companies/${id}`,
     params: {
-      queryKey: ["staff", id],
+      queryKey: ["companies", id],
       enabled: !!id,
 
       onSuccess: (res: any) => {
-        setFormData(res.data.Staff);
+        setFormData(res.data.Company);
       },
       onError: (error: AxiosError) => {
         toast.error(error.message);
@@ -344,31 +414,23 @@ export default function SettingsProfilePage() {
     },
   });
   return (
-    <Card className="min-w-[350px] overflow-auto bg-light shadow-md pt-4 ">
-      <Button
-        onClick={() => window.history.back()}
-        className="ml-4 flex gap-2 m-8 mb-4"
-      >
-        <MoveLeft className="w-5 text-white" />
-        Back
-      </Button>
-
-      <CardHeader>
-        <div className="flex justify-between">
-          <CardTitle>Staff Master</CardTitle>
-          {formData?.institute_name && (
-            <span className="text-muted-foreground">
-              {formData.institute_name}
-            </span>
-          )}
-        </div>
-        <CardDescription>Edit/Update the Staff</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6 ">
-          <ProfileForm formData={formData} id={id} />
-        </div>
-      </CardContent>
-    </Card>
-  );
+    <div>
+          <div className="relative flex justify-center items-center p-4">
+            <Button
+              onClick={() => window.history.back()}
+              className="absolute left-4 top-1/2 -translate-y-1/2 flex gap-2"
+            >
+              <MoveLeft className="w-5 text-white" />
+              Back
+            </Button>
+            <div className="text-center">
+              <h1 className="text-2xl font-bold tracking-tight">Company Master</h1>
+              <h2 className="text-sm text-muted-foreground">Edit Company Form</h2>
+            </div>
+          </div>
+            <div className="space-y-3 ">
+            <ProfileForm formData={formData} id={id} />
+            </div>
+         </div>
+   );
 }

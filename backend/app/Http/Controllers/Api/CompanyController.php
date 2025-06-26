@@ -45,9 +45,18 @@ class CompanyController extends BaseController
     {
         // Create a new staff record and assign the institute_id from the logged-in admin
         $company = new company();
-         $company->company_name = $request->input('course_id');
-        $company->semester = $request->input('semester');
-        $company->standard = $request->input('standard');
+         $company->company_name = $request->input('company_name');
+        $company->street_address = $request->input('street_address');
+        $company->area = $request->input('area');
+        $company->city = $request->input('city');
+        $company->state = $request->input('state');
+        $company->pincode = $request->input('pincode');
+        $company->country = $request->input('country');
+        $company->type_of_company = $request->input('type_of_company');
+        $company->other_type_of_company = $request->input('other_type_of_company');
+        $company->contact_person = $request->input('contact_person');
+        $company->contact_email = $request->input('contact_email');
+        $company->contact_mobile = $request->input('contact_mobile');
          $company->save();
         
         return $this->sendResponse([new CompanyResource($company)], "Company stored successfully");
@@ -77,9 +86,18 @@ class CompanyController extends BaseController
         }
        
                        
-         $company->course_id = $request->input('course_id');
-        $company->semester = $request->input('semester');
-        $company->standard = $request->input('standard');
+         $company->company_name = $request->input('company_name');
+        $company->street_address = $request->input('street_address');
+        $company->area = $request->input('area');
+        $company->city = $request->input('city');
+        $company->state = $request->input('state');
+        $company->pincode = $request->input('pincode');
+        $company->country = $request->input('country');
+        $company->type_of_company = $request->input('type_of_company');
+        $company->other_type_of_company = $request->input('other_type_of_company');
+        $company->contact_person = $request->input('contact_person');
+        $company->contact_email = $request->input('contact_email');
+        $company->contact_mobile = $request->input('contact_mobile');
            
         $company->save();
        

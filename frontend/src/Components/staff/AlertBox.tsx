@@ -35,7 +35,7 @@ export default function AlertDialogbox({
     // window.location.reload();
     onClose();
     fetchData();
-    queryClient.invalidateQueries({ queryKey: ["patientmaster"] });
+    queryClient.invalidateQueries({ queryKey: ["staff"] });
   };
 
   useEffect(() => {

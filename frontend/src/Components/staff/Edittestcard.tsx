@@ -77,6 +77,7 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
   const updateStaffMutation = usePutData({
     endpoint: `/api/staff/${id}`,
     params: {
+      queryKey: ["staff"],
 
       onSuccess: () => {
         toast.success("Staff Updated Successfully");
