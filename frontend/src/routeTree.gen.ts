@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
 import { Route as StaffIndexImport } from './routes/staff/index'
 import { Route as LoginIndexImport } from './routes/login/index'
+import { Route as FollowUpIndexImport } from './routes/follow-up/index'
 import { Route as DashboardsIndexImport } from './routes/dashboards/index'
 import { Route as CompanyIndexImport } from './routes/company/index'
 import { Route as StaffAddIndexImport } from './routes/staff/add/index'
@@ -38,6 +39,12 @@ const StaffIndexRoute = StaffIndexImport.update({
 const LoginIndexRoute = LoginIndexImport.update({
   id: '/login/',
   path: '/login/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const FollowUpIndexRoute = FollowUpIndexImport.update({
+  id: '/follow-up/',
+  path: '/follow-up/',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -102,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardsIndexImport
       parentRoute: typeof rootRoute
     }
+    '/follow-up/': {
+      id: '/follow-up/'
+      path: '/follow-up'
+      fullPath: '/follow-up'
+      preLoaderRoute: typeof FollowUpIndexImport
+      parentRoute: typeof rootRoute
+    }
     '/login/': {
       id: '/login/'
       path: '/login'
@@ -153,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/company': typeof CompanyIndexRoute
   '/dashboards': typeof DashboardsIndexRoute
+  '/follow-up': typeof FollowUpIndexRoute
   '/login': typeof LoginIndexRoute
   '/staff': typeof StaffIndexRoute
   '/company/edit/$id': typeof CompanyEditIdRoute
@@ -165,6 +180,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/company': typeof CompanyIndexRoute
   '/dashboards': typeof DashboardsIndexRoute
+  '/follow-up': typeof FollowUpIndexRoute
   '/login': typeof LoginIndexRoute
   '/staff': typeof StaffIndexRoute
   '/company/edit/$id': typeof CompanyEditIdRoute
@@ -178,6 +194,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/company/': typeof CompanyIndexRoute
   '/dashboards/': typeof DashboardsIndexRoute
+  '/follow-up/': typeof FollowUpIndexRoute
   '/login/': typeof LoginIndexRoute
   '/staff/': typeof StaffIndexRoute
   '/company/edit/$id': typeof CompanyEditIdRoute
@@ -192,6 +209,7 @@ export interface FileRouteTypes {
     | '/'
     | '/company'
     | '/dashboards'
+    | '/follow-up'
     | '/login'
     | '/staff'
     | '/company/edit/$id'
@@ -203,6 +221,7 @@ export interface FileRouteTypes {
     | '/'
     | '/company'
     | '/dashboards'
+    | '/follow-up'
     | '/login'
     | '/staff'
     | '/company/edit/$id'
@@ -214,6 +233,7 @@ export interface FileRouteTypes {
     | '/'
     | '/company/'
     | '/dashboards/'
+    | '/follow-up/'
     | '/login/'
     | '/staff/'
     | '/company/edit/$id'
@@ -227,6 +247,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CompanyIndexRoute: typeof CompanyIndexRoute
   DashboardsIndexRoute: typeof DashboardsIndexRoute
+  FollowUpIndexRoute: typeof FollowUpIndexRoute
   LoginIndexRoute: typeof LoginIndexRoute
   StaffIndexRoute: typeof StaffIndexRoute
   CompanyEditIdRoute: typeof CompanyEditIdRoute
@@ -239,6 +260,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CompanyIndexRoute: CompanyIndexRoute,
   DashboardsIndexRoute: DashboardsIndexRoute,
+  FollowUpIndexRoute: FollowUpIndexRoute,
   LoginIndexRoute: LoginIndexRoute,
   StaffIndexRoute: StaffIndexRoute,
   CompanyEditIdRoute: CompanyEditIdRoute,
@@ -260,6 +282,7 @@ export const routeTree = rootRoute
         "/",
         "/company/",
         "/dashboards/",
+        "/follow-up/",
         "/login/",
         "/staff/",
         "/company/edit/$id",
@@ -276,6 +299,9 @@ export const routeTree = rootRoute
     },
     "/dashboards/": {
       "filePath": "dashboards/index.tsx"
+    },
+    "/follow-up/": {
+      "filePath": "follow-up/index.tsx"
     },
     "/login/": {
       "filePath": "login/index.tsx"

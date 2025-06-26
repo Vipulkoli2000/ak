@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\StaffController;
 use App\Http\Controllers\Api\CompanyController;
+use App\Http\Controllers\Api\FollowUpController;
 use App\Http\Controllers\Api\DashboardController; 
 
 
@@ -25,6 +26,9 @@ Route::group(['middleware'=>['auth:sanctum', 'permission','request.null']], func
    Route::get('/all_companies', [CompanyController::class, 'allCompany'])->name("companys.all");
    // Company resource routes
    Route::resource('companies', CompanyController::class);
+
+   Route::resource('followup', FollowUpController::class);
+   Route::get('/all_followup', [FollowUpController::class, 'allFollowup'])->name("followups.all");
  
 
    // Dashboard route

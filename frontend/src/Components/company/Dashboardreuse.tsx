@@ -504,21 +504,27 @@ export default function Dashboard({
                                         >
                                           <DropdownSection title="Actions">
                                             <DropdownItem
-                                              key="edit"
-                                              description="Edit company details"
-                                              onPress={() =>
-                                                navigate({
-                                                  to: "/company/edit/" + row?.id,
-                                                })
-                                              }
-                                              startContent={
-                                                <EditDocumentIcon
-                                                  className={iconClasses}
-                                                />
-                                              }
-                                            >
-                                              Edit
-                                            </DropdownItem>
+  key="edit"
+  description="Edit company details"
+  onPress={() =>
+    navigate({
+      to: "/company/edit/" + row?.id,
+    })
+  }
+  startContent={
+    <EditDocumentIcon className={iconClasses} />
+  }
+>
+  Edit
+</DropdownItem>
+<DropdownItem
+  key="followup"
+  description="Go to follow up page"
+  onPress={() => navigate({ to: "/follow-up", search: { company_id: row?.id } })}
+  startContent={<FileText className={iconClasses} />}
+>
+  Follow Up
+</DropdownItem>
                                           </DropdownSection>
                                           <DropdownSection title="Danger zone">
                                             <DropdownItem
