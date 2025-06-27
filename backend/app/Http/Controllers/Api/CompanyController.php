@@ -66,6 +66,10 @@ class CompanyController extends BaseController
         $company->alternate_contact_person_designation = $request->input('alternate_contact_person_designation');
         $company->alternate_contact_email = $request->input('alternate_contact_email');
         $company->alternate_contact_mobile = $request->input('alternate_contact_mobile');
+        
+        // Set default status to 'waiting' when a company is created
+        $company->status = 'waiting';
+
          $company->save();
         
         return $this->sendResponse([new CompanyResource($company)], "Company stored successfully");
@@ -157,7 +161,7 @@ class CompanyController extends BaseController
         }
 
         try {
-            // You can use the company data if needed in the email
+            // Retrieve the targeted company
             $company = company::find($request->companyId);
 
             // Send a simple text email. Replace with Mailable if you need rich content.
@@ -169,6 +173,12 @@ class CompanyController extends BaseController
                             'mime' => 'application/pdf',
                         ]);
             });
+
+            // Update status to 'interested' after sending the brochure successfully
+            if ($company) {
+                $company->status = 'interested';
+                $company->save();
+            }
 
             return $this->sendResponse([], 'Brochure sent successfully');
         } catch (\Exception $e) {

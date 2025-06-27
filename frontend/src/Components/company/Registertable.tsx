@@ -21,6 +21,7 @@ interface Company {
   contact_email: string;
   contact_mobile: string;
   role: string;
+  status: string;
   services?: { serviceId?: { price?: number } }[];
   paymentMode?: { paidAmount?: number };
 }
@@ -160,6 +161,8 @@ export default function Dashboardholiday() {
           { label: "Company Name", key: "one" },
           { label: "Email", key: "two" },
           { label: "Mobile", key: "three" },
+          { label: "Send Brochure", key: "send_brochure" },
+          { label: "Status", key: "four" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -281,6 +284,18 @@ export default function Dashboardholiday() {
         </a>
       ) : (
         "NA"
+      ),
+      four: (
+        <span
+          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            item?.status === "interested"
+              ? "bg-green-100 text-green-800"
+              : item?.status === "waiting"
+              ? "bg-yellow-100 text-yellow-800"
+              : "bg-gray-100 text-gray-800"
+          }`}>
+          {capital(item?.status)}
+        </span>
       ),
       delete:
         item?.role?.toLowerCase() !== "admin" ? "/companies/" + item?.id : null,

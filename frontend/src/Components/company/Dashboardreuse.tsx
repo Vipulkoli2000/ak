@@ -484,93 +484,83 @@ export default function Dashboard({
                                     header.hiddenOn ? header.hiddenOn : ""
                                   }
                                 >
-                                  {header.key === "one" ? (
-                                    row.one
-                                  ) : header.key === "action" ? (
-                                    // Only show action button if the row doesn't have admin role
-                                    !hasAdminRole(row) ? (
-                                      <Dropdown backdrop="blur" showArrow>
-                                        <DropdownTrigger>
-                                          <button className="p-1 rounded-full opacity-100 group-hover:opacity-100 transition-opacity hover:bg-muted">
-                                            <Ellipsis className="w-5 h-5 text-muted-foreground" />
-                                          </button>
-                                        </DropdownTrigger>
-                                        <DropdownMenu
-                                          aria-label="Actions"
-                                          variant="faded"
-                                          className="w-56"
+                                  {(() => {
+                                    if (header.key === "action") {
+                                      return !hasAdminRole(row) ? (
+                                        <Dropdown backdrop="blur" showArrow>
+                                          <DropdownTrigger>
+                                            <button className="p-1 rounded-full opacity-100 group-hover:opacity-100 transition-opacity hover:bg-muted">
+                                              <Ellipsis className="w-5 h-5 text-muted-foreground" />
+                                            </button>
+                                          </DropdownTrigger>
+                                          <DropdownMenu
+                                            aria-label="Actions"
+                                            variant="faded"
+                                            className="w-56"
+                                          >
+                                            <DropdownSection title="Actions">
+                                              <DropdownItem
+                                                key="edit"
+                                                description="Edit company details"
+                                                onPress={() =>
+                                                  navigate({
+                                                    to: "/company/edit/" + row?.id,
+                                                  })
+                                                }
+                                                startContent={
+                                                  <EditDocumentIcon className={iconClasses} />
+                                                }
+                                              >
+                                                Edit
+                                              </DropdownItem>
+                                              <DropdownItem
+                                                key="followup"
+                                                description="Go to follow up page"
+                                                onPress={() => navigate({ to: "/follow-up", search: { company_id: row?.id } })}
+                                                startContent={<FileText className={iconClasses} />}
+                                              >
+                                                Follow Up
+                                              </DropdownItem>
+                                            </DropdownSection>
+                                            <DropdownSection title="Danger zone">
+                                              <DropdownItem
+                                                key="delete"
+                                                className="text-danger"
+                                                color="danger"
+                                                description="This action cannot be undone"
+                                                onPress={() => {
+                                                  setEditid(row?.id);
+                                                  setToggleopen(true);
+                                                }}
+                                                startContent={
+                                                  <DeleteDocumentIcon
+                                                    className={cn(
+                                                      iconClasses,
+                                                      "text-danger"
+                                                    )}
+                                                  />
+                                                }
+                                              >
+                                                Delete
+                                              </DropdownItem>
+                                            </DropdownSection>
+                                          </DropdownMenu>
+                                        </Dropdown>
+                                      ) : null;
+                                    } else if (header.key === "send_brochure") {
+                                      return (
+                                        <Button
+                                          size="sm"
+                                          variant="flat"
+                                          onPress={() => handleSendBrochureClick(row)}
                                         >
-                                          <DropdownSection title="Actions">
-                                            <DropdownItem
-  key="edit"
-  description="Edit company details"
-  onPress={() =>
-    navigate({
-      to: "/company/edit/" + row?.id,
-    })
-  }
-  startContent={
-    <EditDocumentIcon className={iconClasses} />
-  }
->
-  Edit
-</DropdownItem>
-<DropdownItem
-  key="followup"
-  description="Go to follow up page"
-  onPress={() => navigate({ to: "/follow-up", search: { company_id: row?.id } })}
-  startContent={<FileText className={iconClasses} />}
->
-  Follow Up
-</DropdownItem>
-                                          </DropdownSection>
-                                          <DropdownSection title="Danger zone">
-                                            <DropdownItem
-                                              key="delete"
-                                              className="text-danger"
-                                              color="danger"
-                                              description="This action cannot be undone"
-                                              onPress={() => {
-                                                setEditid(row?.id);
-                                                setToggleopen(true);
-                                              }}
-                                              startContent={
-                                                <DeleteDocumentIcon
-                                                  className={cn(
-                                                    iconClasses,
-                                                    "text-danger"
-                                                  )}
-                                                />
-                                              }
-                                            >
-                                              Delete
-                                            </DropdownItem>
-                                          </DropdownSection>
-                                        </DropdownMenu>
-                                      </Dropdown>
-                                    ) : null
-                                  ) : header.key === "two" ? (
-                                    row.two
-                                  ) : header.key === "three" ? (
-                                    <div className="flex items-center gap-2">
-                                     {row.three}
-                                     <Button
-                                       size="sm"
-                                       variant="flat"
-                                       onPress={() => handleSendBrochureClick(row)}
-                                     >
-                                       Send Brochure
-                                     </Button>
-                                   </div>
-                                  ) : header.key === "four" ? (
-                                    row.four
-                                  ) : header.key === "five" ? (
-                                    row.five
-                                  ) : header.key === "six" ? (
-                                    `₹${row.six}`
-                                  ) : (
-                                    row[header.key]
-                                  )}
+                                          Send Brochure
+                                        </Button>
+                                      );
+                                    } else {
+                                      return row[header.key];
+                                    }
+                                  })()}
                                 </TableCell>
                               ))}
                              
