@@ -1,17 +1,22 @@
 import { useState, useEffect } from "react";
-
-
 import { Users, Building2 } from "lucide-react";
 import { useGetData } from "../HTTP/GET";
-
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 
 export default function ResponsiveLabDashboard() {
@@ -20,16 +25,24 @@ export default function ResponsiveLabDashboard() {
 
   const [staffCount, setStaffCount] = useState(0);
   const [companyCount, setCompanyCount] = useState(0);
+  const [followUps, setFollowUps] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [nextPageUrl, setNextPageUrl] = useState<string | null>(null);
+  const [prevPageUrl, setPrevPageUrl] = useState<string | null>(null);
 
   useGetData({
-    endpoint: "/api/dashboard",
+    endpoint: `/api/dashboard?page=${currentPage}&company_name=${searchQuery}`,
     params: {
-      queryKey: ["dashboard"],
+      queryKey: ["dashboard", searchQuery, currentPage.toString()],
       onSuccess: (data: any) => {
         if (data.status) {
-          const { staff_summary } = data.data;
+          const { staff_summary, follow_ups } = data.data;
           setStaffCount(staff_summary.total_staff);
           setCompanyCount(staff_summary.company_count);
+          setFollowUps(follow_ups.data || []);
+          setNextPageUrl(follow_ups.next_page_url);
+          setPrevPageUrl(follow_ups.prev_page_url);
         }
       },
       onError: (error: any) => {
@@ -84,7 +97,80 @@ export default function ResponsiveLabDashboard() {
           </>
         </div>
 
-
+        <div className="mt-8">
+          <Card className="bg-accent/40">
+            <CardHeader>
+              <CardTitle>Follow-ups</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                <Input
+                  placeholder="Filter by company name..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="max-w-sm"
+                />
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Company Name</TableHead>
+                    <TableHead>Notes</TableHead>
+                    <TableHead>Follow-up Date</TableHead>
+                    <TableHead>Next Follow-up Date</TableHead>
+                    <TableHead>Follow-up Type</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {followUps.length > 0 ? (
+                    followUps.map((followUp) => (
+                      <TableRow key={followUp.id}>
+                        <TableCell className="font-medium">{followUp.company_name}</TableCell>
+                        <TableCell>{followUp.notes}</TableCell>
+                        <TableCell>{new Date(followUp.follow_up_date).toLocaleDateString()}</TableCell>
+                        <TableCell>{new Date(followUp.next_follow_up_date).toLocaleDateString()}</TableCell>
+                        <TableCell>{followUp.follow_up_type}</TableCell>
+                        <TableCell>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {followUp.status}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center">
+                        No follow-ups found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+              <div className="flex items-center justify-end space-x-2 py-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={!prevPageUrl}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={!nextPageUrl}
+                >
+                  Next
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );

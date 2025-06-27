@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Link } from "@tanstack/react-router";
 import { buttonVariants } from "@/components/ui/button";
 import { UseFormHook } from "@/components/ui/HookFormcomp";
-import background from "../../images/Jeevandeep-library.jpeg";
+import background from "../../images/cargo.webp";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import axios from "axios";
@@ -113,7 +113,7 @@ const Login = () => {
             backgroundImage: `url(${background})`,
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
-            backgroundPosition: "bottom",
+            backgroundPosition: "center",
           }}
           className="absolute inset-0 "
         />
@@ -137,9 +137,9 @@ const Login = () => {
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
-            <p className="text-lg text-white font-bold">Welcome To AK's APP</p>
+            <p className="text-lg text-white font-bold">Welcome To KK's APP</p>
             <footer className="text-sm text-white">
-              AK's APP
+              KK's APP
             </footer>
           </blockquote>
         </div>
