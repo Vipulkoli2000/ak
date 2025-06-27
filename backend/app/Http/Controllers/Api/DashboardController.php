@@ -32,6 +32,11 @@ class DashboardController extends Controller
             }
             $staff = Staff::all();
 
+            // Get the next upcoming follow-up date
+            $nextUpcomingFollowUp = FollowUp::where('next_follow_up_date', '>=', Carbon::now())
+                ->orderBy('next_follow_up_date', 'asc')
+                ->first();
+
             $followUpsQuery = FollowUp::with('company');
 
             if ($request->has('company_name')) {
@@ -47,6 +52,7 @@ class DashboardController extends Controller
                         'total_staff' => $staff->count(),
                         'company_count' => company::count()
                     ],
+                    'next_upcoming_follow_up' => $nextUpcomingFollowUp ? $nextUpcomingFollowUp->next_follow_up_date : null,
                     'follow_ups' => tap($followUpsQuery->orderBy('follow_up_date', 'asc')->simplePaginate(7), function ($paginator) {
                         return $paginator->getCollection()->transform(function ($followUp) {
                             return [
@@ -55,7 +61,6 @@ class DashboardController extends Controller
                                 'follow_up_date' => $followUp->follow_up_date,
                                 'next_follow_up_date' => $followUp->next_follow_up_date,
                                 'follow_up_type' => $followUp->follow_up_type,
-                                'notes' => $followUp->remarks,
                                 'status' => $followUp->company ? $followUp->company->status : 'N/A',
                             ];
                         });

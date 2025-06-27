@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Building2 } from "lucide-react";
+import { Users, Building2, CalendarClock } from "lucide-react";
 import { useGetData } from "../HTTP/GET";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ export default function ResponsiveLabDashboard() {
 
   const [staffCount, setStaffCount] = useState(0);
   const [companyCount, setCompanyCount] = useState(0);
+  const [nextUpcomingFollowUp, setNextUpcomingFollowUp] = useState<string | null>(null);
   const [followUps, setFollowUps] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,9 +38,10 @@ export default function ResponsiveLabDashboard() {
       queryKey: ["dashboard", searchQuery, currentPage.toString()],
       onSuccess: (data: any) => {
         if (data.status) {
-          const { staff_summary, follow_ups } = data.data;
+          const { staff_summary, follow_ups, next_upcoming_follow_up } = data.data;
           setStaffCount(staff_summary.total_staff);
           setCompanyCount(staff_summary.company_count);
+          setNextUpcomingFollowUp(next_upcoming_follow_up);
           setFollowUps(follow_ups.data || []);
           setNextPageUrl(follow_ups.next_page_url);
           setPrevPageUrl(follow_ups.prev_page_url);
@@ -71,7 +73,7 @@ export default function ResponsiveLabDashboard() {
           </h1>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <>
             <Card className="bg-accent/40 transition-shadow duration-200 ease-in-out hover:shadow-lg">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -94,31 +96,43 @@ export default function ResponsiveLabDashboard() {
                 <div className="text-2xl font-bold">{companyCount}</div>
               </CardContent>
             </Card>
+            <Card className="bg-accent/40 transition-shadow duration-200 ease-in-out hover:shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  Next Follow-up
+                </CardTitle>
+                <CalendarClock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {nextUpcomingFollowUp
+                    ? new Date(nextUpcomingFollowUp).toLocaleDateString()
+                    : "N/A"}
+                </div>
+              </CardContent>
+            </Card>
           </>
         </div>
 
         <div className="mt-8">
           <Card className="bg-accent/40">
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Follow-ups</CardTitle>
+              <Input
+                placeholder="Filter by company name..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="max-w-sm"
+              />
             </CardHeader>
             <CardContent>
-              <div className="mb-4">
-                <Input
-                  placeholder="Filter by company name..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="max-w-sm"
-                />
-              </div>
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Company Name</TableHead>
-                    <TableHead>Notes</TableHead>
                     <TableHead>Follow-up Date</TableHead>
                     <TableHead>Next Follow-up Date</TableHead>
                     <TableHead>Follow-up Type</TableHead>
@@ -130,7 +144,7 @@ export default function ResponsiveLabDashboard() {
                     followUps.map((followUp) => (
                       <TableRow key={followUp.id}>
                         <TableCell className="font-medium">{followUp.company_name}</TableCell>
-                        <TableCell>{followUp.notes}</TableCell>
+                       
                         <TableCell>{new Date(followUp.follow_up_date).toLocaleDateString()}</TableCell>
                         <TableCell>{new Date(followUp.next_follow_up_date).toLocaleDateString()}</TableCell>
                         <TableCell>{followUp.follow_up_type}</TableCell>
