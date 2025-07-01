@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Staff;
-use App\Models\company;
+use App\Models\Company;
 use App\Models\FollowUp;
  
 use Carbon\Carbon;    // For date calculations
@@ -50,7 +50,7 @@ class DashboardController extends Controller
                 'data' => [
                     'staff_summary' => [
                         'total_staff' => $staff->count(),
-                        'company_count' => company::count()
+                        'company_count' => Company::count()
                     ],
                     'next_upcoming_follow_up' => $nextUpcomingFollowUp ? $nextUpcomingFollowUp->next_follow_up_date : null,
                     'follow_ups' => tap($followUpsQuery->orderBy('follow_up_date', 'asc')->simplePaginate(7), function ($paginator) {

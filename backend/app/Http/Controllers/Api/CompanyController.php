@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\company;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -19,7 +19,7 @@ class CompanyController extends BaseController
        
     
         // Build the base query.
-        $query = company::query();
+        $query = Company::query();
 
         // If there's a search term, apply additional filtering.
         if ($searchTerm = $request->query('search')) {
@@ -48,7 +48,7 @@ class CompanyController extends BaseController
     public function store(Request $request): JsonResponse
     {
         // Create a new staff record and assign the institute_id from the logged-in admin
-        $company = new company();
+        $company = new Company();
          $company->company_name = $request->input('company_name');
         $company->street_address = $request->input('street_address');
         $company->area = $request->input('area');
@@ -92,7 +92,7 @@ class CompanyController extends BaseController
     public function update(Request $request, string $id): JsonResponse
     {
  
-        $company = company::find($id);
+        $company = Company::find($id);
 
         if(!$company){
             return $this->sendError("Company not found", ['error'=>'Company not found']);
@@ -128,7 +128,7 @@ class CompanyController extends BaseController
 
     public function destroy(string $id): JsonResponse
     {
-        $company = company::find($id);
+        $company = Company::find($id);
         if(!$company){
             return $this->sendError("Company not found", ['error'=> 'Company not found']);
         }
@@ -140,7 +140,7 @@ class CompanyController extends BaseController
     {
       
         // Retrieve all companies.
-        $company = company::all();
+        $company = Company::all();
     
         return $this->sendResponse(
             ["Company" => CompanyResource::collection($company)],
@@ -162,7 +162,7 @@ class CompanyController extends BaseController
 
         try {
             // Retrieve the targeted company
-            $company = company::find($request->companyId);
+            $company = Company::find($request->companyId);
 
             // Send a simple text email. Replace with Mailable if you need rich content.
             Mail::raw('Please find the brochure attached.', function ($message) use ($request) {
