@@ -26,7 +26,9 @@ Route::group(['middleware'=>['auth:sanctum', 'permission','request.null']], func
    Route::get('/all_companies', [CompanyController::class, 'allCompany'])->name("companys.all");
    // Send brochure route
    Route::post('/companies/send-brochure', [CompanyController::class, 'sendBrochure'])->name('companies.send-brochure');
-   // Company resource routes
+    // Company types dropdown
+   Route::get('/company-types', [CompanyController::class, 'types'])->name('companies.types');
+    // Company resource routes
    Route::resource('companies', CompanyController::class);
    //followup
    Route::resource('followup', FollowUpController::class);

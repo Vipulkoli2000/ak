@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, ControllerRenderProps } from "react-hook-form";
 import { z } from "zod";
 import { MoveLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -19,13 +19,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Combobox } from "@/components/ui/combobox";
+import axios from "axios";
 import { AxiosError } from "axios";
 import { usePutData } from "@/Components/HTTP/PUT";
 import { useGetData } from "@/Components/HTTP/GET";
@@ -105,7 +100,39 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
     mode: "onChange",
   });
   const navigate = useNavigate();
-    const typeOfCompany = form.watch("type_of_company");
+
+  // dynamic company types for combobox
+  const [companyTypes, setCompanyTypes] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const res = await axios.get("/api/company-types", {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
+        const types: string[] = Array.isArray(res.data?.data) ? res.data.data : [];
+        const opts = types.map((t) => ({ value: t, label: t }));
+        setCompanyTypes([
+          ...opts.filter((o) => o.value !== "Other"),
+          { value: "Other", label: "Other" },
+        ]);
+      } catch (e) {
+        // fallback static list
+        setCompanyTypes([
+          { value: "Merchant Exporter", label: "Merchant Exporter" },
+          { value: "Merchant cum Manufacturer Exporter", label: "Merchant cum Manufacturer Exporter" },
+          { value: "Manufacturer Exporter", label: "Manufacturer Exporter" },
+          { value: "Service Provider", label: "Service Provider" },
+          { value: "Other", label: "Other" },
+        ]);
+      }
+    };
+    fetchTypes();
+  }, []);
+
+  const typeOfCompany = form.watch("type_of_company");
 
   useEffect(() => {
     if (typeOfCompany !== "Other") {
@@ -208,20 +235,12 @@ function ProfileForm({ formData, id }: { formData: any; id?: string }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Type of Company<span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a type of company" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Merchant Exporter">Merchant Exporter</SelectItem>
-                          <SelectItem value="Merchant cum Manufacturer Exporter">Merchant cum Manufacturer Exporter</SelectItem>
-                          <SelectItem value="Manufacturer Exporter">Manufacturer Exporter</SelectItem>
-                          <SelectItem value="Service Provider">Service Provider</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={companyTypes}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Select a type of company"
+                      />
                       <FormMessage />
                     </FormItem>
                   )}

@@ -21,6 +21,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Combobox } from "@/components/ui/combobox";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Select,
   SelectContent,
@@ -32,7 +35,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { AxiosError } from "axios";
 import { usePostData } from "@/Components/HTTP/POST";
 import { toast } from "sonner";
-import { useEffect } from "react";
 
  
 const profileFormSchema = z
@@ -104,6 +106,37 @@ const defaultValues: Partial<ProfileFormValues> = {
 };
 
 function ProfileForm() {
+  // store dropdown options
+  const [companyTypes, setCompanyTypes] = useState<{ value: string; label: string }[]>([]);
+
+  // fetch distinct company types once
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const res = await axios.get("/api/company-types", {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
+        const types: string[] = Array.isArray(res.data?.data) ? res.data.data : [];
+        const opts = types.map((t) => ({ value: t, label: t }));
+        setCompanyTypes([
+          ...opts.filter((o) => o.value !== "Other"),
+          { value: "Other", label: "Other" },
+        ]);
+      } catch (e) {
+        // fallback defaults
+        setCompanyTypes([
+          { value: "Merchant Exporter", label: "Merchant Exporter" },
+          { value: "Merchant cum Manufacturer Exporter", label: "Merchant cum Manufacturer Exporter" },
+          { value: "Manufacturer Exporter", label: "Manufacturer Exporter" },
+          { value: "Service Provider", label: "Service Provider" },
+          { value: "Other", label: "Other" },
+        ]);
+      }
+    };
+    fetchTypes();
+  }, []);
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -221,20 +254,12 @@ function ProfileForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Type of Company<span className="text-red-500">*</span></FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a type of company" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Merchant Exporter">Merchant Exporter</SelectItem>
-                          <SelectItem value="Merchant cum Manufacturer Exporter">Merchant cum Manufacturer Exporter</SelectItem>
-                          <SelectItem value="Manufacturer Exporter">Manufacturer Exporter</SelectItem>
-                          <SelectItem value="Service Provider">Service Provider</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <Combobox
+                        options={companyTypes}
+                        value={field.value}
+                        onValueChange={field.onChange}
+                        placeholder="Select a type of company"
+                      />
                       <FormMessage />
                     </FormItem>
                   )}

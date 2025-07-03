@@ -56,8 +56,16 @@ class CompanyController extends BaseController
         $company->state = $request->input('state');
         $company->pincode = $request->input('pincode');
         $company->country = $request->input('country');
-        $company->type_of_company = $request->input('type_of_company');
-        $company->other_type_of_company = $request->input('other_type_of_company');
+        // Handle dynamic company type: if "Other" chosen, save the custom value
+        $selectedType = $request->input('type_of_company');
+        $otherType    = $request->input('other_type_of_company');
+        if ($selectedType === 'Other' && !empty($otherType)) {
+            $company->type_of_company        = $otherType;
+            $company->other_type_of_company  = $otherType; // keep reference
+        } else {
+            $company->type_of_company        = $selectedType;
+            $company->other_type_of_company  = null;
+        }
         $company->contact_person = $request->input('contact_person');
         $company->contact_person_designation = $request->input('contact_person_designation');
         $company->contact_email = $request->input('contact_email');
@@ -106,8 +114,16 @@ class CompanyController extends BaseController
         $company->state = $request->input('state');
         $company->pincode = $request->input('pincode');
         $company->country = $request->input('country');
-        $company->type_of_company = $request->input('type_of_company');
-        $company->other_type_of_company = $request->input('other_type_of_company');
+        // Handle dynamic company type: if "Other" chosen, save the custom value
+        $selectedType = $request->input('type_of_company');
+        $otherType    = $request->input('other_type_of_company');
+        if ($selectedType === 'Other' && !empty($otherType)) {
+            $company->type_of_company        = $otherType;
+            $company->other_type_of_company  = $otherType; // keep reference
+        } else {
+            $company->type_of_company        = $selectedType;
+            $company->other_type_of_company  = null;
+        }
         $company->contact_person = $request->input('contact_person');
         $company->contact_person_designation = $request->input('contact_person_designation');
         $company->contact_email = $request->input('contact_email');
@@ -125,6 +141,14 @@ class CompanyController extends BaseController
 
     }
 
+    /**
+     * Get distinct company types for dropdowns.
+     */
+    public function types(): JsonResponse
+    {
+        $types = Company::query()->distinct()->pluck('type_of_company');
+        return $this->sendResponse($types, 'Company types retrieved successfully');
+    }
 
     public function destroy(string $id): JsonResponse
     {
