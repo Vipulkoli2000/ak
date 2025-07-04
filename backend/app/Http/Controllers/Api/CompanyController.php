@@ -16,8 +16,6 @@ class CompanyController extends BaseController
 {
     public function index(Request $request): JsonResponse
     {
-       
-    
         // Build the base query.
         $query = Company::query();
 
@@ -25,6 +23,34 @@ class CompanyController extends BaseController
         if ($searchTerm = $request->query('search')) {
             $query->where('company_name', 'like', '%' . $searchTerm . '%');
         }
+
+        // Company type filtering
+        if ($companyType = $request->query('company_type')) {
+            $query->where('type_of_company', $companyType);
+        }
+
+        // Date filtering by month and year
+        if ($month = $request->query('month')) {
+            $query->whereMonth('created_at', $month);
+        }
+        
+        if ($year = $request->query('year')) {
+            $query->whereYear('created_at', $year);
+        }
+        
+        // If both month and year are provided, filter by both
+        if ($request->query('date_filter')) {
+            $dateFilter = $request->query('date_filter'); // Format: YYYY-MM
+            if (preg_match('/^(\d{4})-(\d{2})$/', $dateFilter, $matches)) {
+                $year = $matches[1];
+                $month = $matches[2];
+                $query->whereYear('created_at', $year)
+                      ->whereMonth('created_at', $month);
+            }
+        }
+
+        // Order by created_at desc to show latest first
+        $query->orderBy('created_at', 'desc');
 
         // Paginate the results.
         $company = $query->paginate(7);
@@ -146,8 +172,18 @@ class CompanyController extends BaseController
      */
     public function types(): JsonResponse
     {
-        $types = Company::query()->distinct()->pluck('type_of_company');
-        return $this->sendResponse($types, 'Company types retrieved successfully');
+        try {
+            $types = Company::query()
+                ->distinct()
+                ->whereNotNull('type_of_company')
+                ->where('type_of_company', '!=', '')
+                ->pluck('type_of_company')
+                ->values(); // Reset array keys
+            
+            return $this->sendResponse($types, 'Company types retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->sendError('Error retrieving company types', ['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -311,6 +347,8 @@ class CompanyController extends BaseController
                     $company->pincode = trim($row[$columnMap['pincode']]);
                     $company->contact_person = trim($row[$columnMap['contact_person']]);
                     $company->contact_mobile = trim($row[$columnMap['contact_mobile']]);
+                    // Set default status to 'waiting' during import
+                    $company->status = 'waiting';
                     
                                         $company->save();
                     

@@ -41,6 +41,7 @@ import {
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useNavigate } from "@tanstack/react-router";
 import { EmptyState } from "@/components/ui/empty-state";
+import { DateFilter } from "@/components/ui/date-filter";
 import {
   Dropdown,
   DropdownSection,
@@ -80,6 +81,10 @@ export default function Dashboard({
   onKeyPress,
   searchQuery,
   handlePageChange,
+  onDateFilter,
+  dateFilter,
+  onCompanyTypeFilter,
+  companyType,
 }: {
   breadcrumbs?: any[];
   searchPlaceholder?: string;
@@ -106,8 +111,12 @@ export default function Dashboard({
   onKeyPress?: any;
   searchQuery?: string;
   handlePageChange?: (page: number) => void;
+  onDateFilter?: (dateValue: string) => void;
+  dateFilter?: string;
+  onCompanyTypeFilter?: (companyType: string) => void;
+  companyType?: string;
 }) {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [toggleedit, setToggleedit] = useState(false);
   const [editid, setEditid] = useState();
   const [toggledelete, setToggledelete] = useState();
@@ -151,8 +160,10 @@ export default function Dashboard({
       setImportDialogOpen(false);
       setSelectedFile(null);
       if (fetchData) {
-        fetchData();
+        await fetchData(); // ensure any local state is updated
       }
+      // Force a full page refresh to guarantee the UI shows the imported companies
+      window.location.reload();
     } catch (error) {
       console.error("Import failed:", error);
       toast.error("Failed to import companies");
@@ -362,6 +373,17 @@ export default function Dashboard({
                     </Button>
                   </div>
                 </div>
+                {/* Date Filter */}
+                <DateFilter
+                  value={dateFilter}
+                  onValueChange={onDateFilter}
+                  companyType={companyType}
+                  onCompanyTypeChange={onCompanyTypeFilter}
+                  showCompanyTypeFilter={true}
+                  placeholder="Filter by month/year & type"
+                  className="w-64"
+                />
+                
                 {/* Import Companies Dialog */}
                 <Dialog open={importDialogOpen} onOpenChange={setImportDialogOpen}>
                   <DialogTrigger asChild>

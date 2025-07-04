@@ -56,6 +56,7 @@ export default function Dashboardholiday() {
     total: 0,
   });
   const [searchQuery, setSearchQuery] = useState("");
+  const [filter, setFilter] = useState<{dateFilter?: string, companyType?: string}>({});
 
   // Data fetching using shared GET hook
   const {
@@ -64,9 +65,16 @@ export default function Dashboardholiday() {
     isError: queryError,
     refetch,
   } = useGetData({
-    endpoint: `/api/companies${searchQuery ? `?search=${searchQuery}&` : "?"}page=${paginationState.currentPage}`,
+    endpoint: (() => {
+      const params = new URLSearchParams()
+      if (searchQuery) params.set('search', searchQuery)
+      if (filter.dateFilter) params.set('date_filter', filter.dateFilter)
+      if (filter.companyType) params.set('company_type', filter.companyType)
+      params.set('page', paginationState.currentPage.toString())
+      return `/api/companies?${params.toString()}`
+    })(),
     params: {
-      queryKey: ["companies", searchQuery, paginationState.currentPage],
+      queryKey: ["companies", searchQuery, filter, paginationState.currentPage],
       onSuccess: (response: any) => {
         if (!response?.data) return;
 
@@ -117,15 +125,25 @@ export default function Dashboardholiday() {
     setPaginationState((prev) => ({ ...prev, currentPage: page }));
   };
 
-  // Refetch whenever search query or page changes
+  // Refetch whenever search query, filters, or page changes
   useEffect(() => {
     refetch();
-  }, [searchQuery, paginationState.currentPage]);
+  }, [searchQuery, filter.dateFilter, filter.companyType, paginationState.currentPage]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
     await fetchData(query, 1);
+  };
+
+  const handleDateFilter = (dateValue: string) => {
+    setFilter((prev) => ({ ...prev, dateFilter: dateValue }));
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
+  };
+
+  const handleCompanyTypeFilter = (companyType: string) => {
+    setFilter((prev) => ({ ...prev, companyType: companyType }));
+    setPaginationState((prev) => ({ ...prev, currentPage: 1 }));
   };
 
   const handleNextPage = () => {
@@ -165,8 +183,8 @@ export default function Dashboardholiday() {
           { label: "Company Type", key: "three" },
           { label: "Email", key: "four" },
           { label: "Mobile", key: "five" },
-          { label: "Status", key: "six" },
           { label: "Send Brochure", key: "send_brochure" },
+          { label: "Status", key: "six" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -278,10 +296,10 @@ export default function Dashboardholiday() {
       if (isNaN(date.getTime())) {
         return "NA";
       }
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+      // Format as "MONTH YEAR" i.e. "JULY 2025"
+      const month = date.toLocaleString("en-US", { month: "long" }).toUpperCase();
       const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
+      return `${month} ${year}`;
     };
 
     const mobileNumber = item?.contact_mobile;
@@ -333,6 +351,10 @@ export default function Dashboardholiday() {
         onFilterChange={handleFilterChange}
         onProductAction={handleProductAction}
         onSearch={handleSearch}
+        onDateFilter={handleDateFilter}
+        onCompanyTypeFilter={handleCompanyTypeFilter}
+        dateFilter={filter.dateFilter}
+        companyType={filter.companyType}
         currentPage={paginationState.currentPage}
         totalPages={paginationState.totalPages}
         handleNextPage={handleNextPage}
