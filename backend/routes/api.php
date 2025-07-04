@@ -28,6 +28,7 @@ Route::group(['middleware'=>['auth:sanctum', 'permission','request.null']], func
    Route::post('/companies/send-brochure', [CompanyController::class, 'sendBrochure'])->name('companies.send-brochure');
     // Company types dropdown
    Route::get('/company-types', [CompanyController::class, 'types'])->name('companies.types');
+   Route::delete('/company-types', [CompanyController::class, 'deleteType'])->name('companies.types.delete');
     // Company resource routes
    Route::resource('companies', CompanyController::class);
    //followup

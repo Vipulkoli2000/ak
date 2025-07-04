@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Combobox } from "@/components/ui/combobox";
+import { ComboboxWithDelete } from "@/components/ui/combobox-with-delete";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -154,6 +154,34 @@ function ProfileForm() {
     }
   }, [typeOfCompany, form]);
 
+  // Handle delete company type
+  const handleDeleteCompanyType = async (typeToDelete: string) => {
+    if (window.confirm(`Are you sure you want to remove the company type "${typeToDelete}" from the dropdown? Companies using this type will have their type set to null.`)) {
+      try {
+        const response = await axios.delete('/api/company-types', {
+          data: { type: typeToDelete },
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        });
+        
+        // Remove the deleted type from the dropdown options
+        setCompanyTypes(prev => prev.filter(option => option.value !== typeToDelete));
+        
+        // If the currently selected type was deleted, clear the selection
+        if (form.getValues('type_of_company') === typeToDelete) {
+          form.setValue('type_of_company', '');
+        }
+        
+        const affectedCount = response.data?.data?.affected_companies || 0;
+        toast.success(`Company type "${typeToDelete}" removed from dropdown. ${affectedCount} companies were affected.`);
+      } catch (error: any) {
+        const errorMessage = error.response?.data?.message || 'Failed to remove company type';
+        toast.error(errorMessage);
+      }
+    }
+  };
+
   // Setup mutation using custom POST hook
   const companyMutation = usePostData({
     endpoint: "/api/companies",
@@ -254,11 +282,13 @@ function ProfileForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Type of Company<span className="text-red-500">*</span></FormLabel>
-                      <Combobox
+                      <ComboboxWithDelete
                         options={companyTypes}
                         value={field.value}
                         onValueChange={field.onChange}
+                        onDelete={handleDeleteCompanyType}
                         placeholder="Select a type of company"
+                        showDelete={true}
                       />
                       <FormMessage />
                     </FormItem>

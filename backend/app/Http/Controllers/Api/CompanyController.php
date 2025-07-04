@@ -150,6 +150,40 @@ class CompanyController extends BaseController
         return $this->sendResponse($types, 'Company types retrieved successfully');
     }
 
+    /**
+     * Delete a company type from dropdown options.
+     */
+    public function deleteType(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Validation Error', $validator->errors(), 422);
+        }
+
+        $type = $request->input('type');
+        
+        // Don't allow deletion of "Other" type
+        if ($type === 'Other') {
+            return $this->sendError('Cannot delete', ['error' => 'Cannot delete "Other" type'], 400);
+        }
+
+        try {
+            // Set type_of_company to null for all companies with this type
+            $affectedCount = Company::where('type_of_company', $type)
+                ->update(['type_of_company' => null]);
+            
+            return $this->sendResponse(
+                ['affected_companies' => $affectedCount], 
+                "Company type '{$type}' removed from dropdown. {$affectedCount} companies had their type set to null."
+            );
+        } catch (\Exception $e) {
+            return $this->sendError('Delete Error', ['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function destroy(string $id): JsonResponse
     {
         $company = Company::find($id);

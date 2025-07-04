@@ -22,8 +22,10 @@ interface Company {
   contact_mobile: string;
   role: string;
   status: string;
+  type_of_company?: string;
   services?: { serviceId?: { price?: number } }[];
   paymentMode?: { paidAmount?: number };
+  created_at: string;
 }
 
 export default function Dashboardholiday() {
@@ -158,11 +160,13 @@ export default function Dashboardholiday() {
         title: `Company`,
         description: "Manage Company  and view their details.",
         headers: [
-          { label: "Company Name", key: "one" },
-          { label: "Email", key: "two" },
-          { label: "Mobile", key: "three" },
+          { label: "Created At", key: "one" },
+          { label: "Company Name", key: "two" },
+          { label: "Company Type", key: "three" },
+          { label: "Email", key: "four" },
+          { label: "Mobile", key: "five" },
+          { label: "Status", key: "six" },
           { label: "Send Brochure", key: "send_brochure" },
-          { label: "Status", key: "four" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -268,13 +272,27 @@ export default function Dashboardholiday() {
         ? str.charAt(0).toUpperCase() + str.slice(1)
         : str;
 
+    const formatDate = (dateString: string | undefined) => {
+      if (!dateString) return "NA";
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return "NA";
+      }
+      const day = String(date.getDate()).padStart(2, "0");
+      const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    };
+
     const mobileNumber = item?.contact_mobile;
 
     return {
       id: item?.id,
-      one: capital(item?.company_name || "NA"),
-      two: capital(item?.contact_email || "NA"),
-      three: mobileNumber ? (
+      one: formatDate(item?.created_at),
+      two: capital(item?.company_name || "NA"),
+      three: capital(item?.type_of_company || "NA"),
+      four: capital(item?.contact_email || "NA"),
+      five: mobileNumber ? (
         <a
           href={`tel:${mobileNumber}`}
           className="text-blue-600 hover:underline"
@@ -285,7 +303,7 @@ export default function Dashboardholiday() {
       ) : (
         "NA"
       ),
-      four: (
+      six: (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
             item?.status === "interested"
