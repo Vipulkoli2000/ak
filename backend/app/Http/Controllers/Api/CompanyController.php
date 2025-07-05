@@ -307,8 +307,8 @@ class CompanyController extends BaseController
                 'company_name'    => array_search('Company Name', $headers),
                 'type_of_company' => array_search('Type Of Company', $headers),
                 'street_address'  => array_search('Street Address', $headers),
-                'state'           => array_search('State', $headers),
-                'pincode'         => array_search('Pincode', $headers),
+                'city'           => array_search('City', $headers),
+                'contact_email'         => array_search('Email', $headers),
                 'contact_person'  => array_search('Contact Person', $headers),
                 'contact_mobile'  => array_search('Contact Mobile', $headers),
             ];
@@ -343,14 +343,14 @@ class CompanyController extends BaseController
                     $company->company_name = trim($row[$columnMap['company_name']]);
                     $company->type_of_company = trim($row[$columnMap['type_of_company']]);
                     $company->street_address = trim($row[$columnMap['street_address']]);
-                    $company->state = trim($row[$columnMap['state']]);
-                    $company->pincode = trim($row[$columnMap['pincode']]);
+                    $company->city = trim($row[$columnMap['city']]);
+                    $company->contact_email = trim($row[$columnMap['contact_email']]);
                     $company->contact_person = trim($row[$columnMap['contact_person']]);
                     $company->contact_mobile = trim($row[$columnMap['contact_mobile']]);
                     // Set default status to 'waiting' during import
                     $company->status = 'waiting';
                     
-                                        $company->save();
+                    $company->save();
                     
                     $importCount++;
                 } catch (\Exception $e) {

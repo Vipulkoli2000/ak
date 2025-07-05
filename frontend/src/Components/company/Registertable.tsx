@@ -181,10 +181,13 @@ export default function Dashboardholiday() {
           { label: "Created At", key: "one" },
           { label: "Company Name", key: "two" },
           { label: "Company Type", key: "three" },
-          { label: "Email", key: "four" },
-          { label: "Mobile", key: "five" },
+          { label: "Street Address", key: "four" },
+          { label: "City", key: "five" },
+          { label: "Email", key: "six" },
+          { label: "Contact Person", key: "seven" },
+          { label: "Mobile", key: "eight" },
           { label: "Send Brochure", key: "send_brochure" },
-          { label: "Status", key: "six" },
+          { label: "Status", key: "nine" },
           { label: "Action", key: "action" },
         ],
         actions: [
@@ -309,8 +312,11 @@ export default function Dashboardholiday() {
       one: formatDate(item?.created_at),
       two: capital(item?.company_name || "NA"),
       three: capital(item?.type_of_company || "NA"),
-      four: capital(item?.contact_email || "NA"),
-      five: mobileNumber ? (
+      four: capital(item?.street_address || "NA"),
+      five: capital(item?.city || "NA"),
+      six: capital(item?.contact_email || "NA"),
+      seven: capital(item?.contact_person || "NA"),
+      eight: mobileNumber ? (
         <a
           href={`tel:${mobileNumber}`}
           className="text-blue-600 hover:underline"
@@ -321,7 +327,7 @@ export default function Dashboardholiday() {
       ) : (
         "NA"
       ),
-      six: (
+      nine: (
         <span
           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
             item?.status === "interested"
